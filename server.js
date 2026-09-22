@@ -16,7 +16,7 @@ const AUCTION_TIME = 15;
 const BID_STEP = 100;
 const START_BALANCE = 500;
 const BATCH_SIZE = 5;
-const REFILL_AT = 4; // لما نوصل السؤال الرابع في الطابور، نجيب 5 جداد
+const REFILL_AT = 4;
 
 const CATEGORIES = {
   football: 'كرة القدم',
@@ -107,7 +107,6 @@ function sanitize(str, max = 20) {
 function publicRoom(room) {
   return {
     code: room.code,
-    teamSize: room.teamSize,
     status: room.status,
     hostId: room.hostId,
     players: Object.values(room.players).map(p => ({
@@ -127,7 +126,9 @@ function publicRoom(room) {
       activeTeam: room.auction.activeTeam,
       timeLeft: room.auction.timeLeft,
       winnerTeam: room.auction.winnerTeam,
-      phase: room.auction.phase // 'bidding' | 'answering' | 'steal-offer' | 'steal-answering'
+      stealTeam: room.auction.stealTeam,
+      stealPrice: room.auction.stealPrice,
+      phase: room.auction.phase
     } : null,
     messages: room.messages.slice(-60)
   };
@@ -170,10 +171,8 @@ function handleTimeout(room) {
   if (!a) return;
 
   if (a.phase === 'bidding') {
-    // الوقت خلص على الفريق النشط = انسحاب
     handlePass(room, a.activeTeam);
   } else if (a.phase === 'answering') {
-    // الوقت خلص = إجابة غلط
     handleAnswer(room, a.winnerTeam, false);
   } else if (a.phase === 'steal-answering') {
     handleStealAnswer(room, false);
@@ -186,7 +185,6 @@ function nextQuestionFromQueue(room) {
   if (room.questions.length === 0) return null;
   const q = room.questions.shift();
   room.usedCount++;
-  // لو الطابور بقى أقل من أو يساوي، اطلب دفعة جديدة في الخلفية
   if (room.questions.length <= BATCH_SIZE - REFILL_AT && !room.loading) {
     refillQuestions(room);
   }
@@ -213,7 +211,6 @@ function beginRound(room) {
   stopAuctionTimer(room);
   const q = nextQuestionFromQueue(room);
   if (!q) {
-    // مفيش أسئلة جاهزة، حاول تجيب
     refillQuestions(room);
     return;
   }
@@ -227,6 +224,8 @@ function beginRound(room) {
     lastBidder: -1,
     activeTeam: room.startingTeam,
     winnerTeam: -1,
+    stealTeam: -1,
+    stealPrice: 0,
     phase: 'bidding',
     timeLeft: AUCTION_TIME,
     timer: null
@@ -259,10 +258,8 @@ function handlePass(room, teamIdx) {
   stopAuctionTimer(room);
 
   if (a.lastBidder === -1) {
-    // محدش زايد خالص → الفريق التاني ياخد السؤال بأقل سعر 100
     const winner = 1 - teamIdx;
     if (room.teams[winner].balance < BID_STEP) {
-      // معندوش حتى 100، تخطى السؤال
       endAuction(room);
       return;
     }
@@ -273,12 +270,10 @@ function handlePass(room, teamIdx) {
     a.winnerTeam = a.lastBidder;
   }
 
-  // اخصم المبلغ
   room.teams[a.winnerTeam].balance -= a.currentBid;
   a.phase = 'answering';
   a.timeLeft = 30;
 
-  // ابعت السؤال بس للفريق الفايز
   io.to(room.code).emit('auction-won', {
     winnerTeam: a.winnerTeam,
     bid: a.currentBid,
@@ -286,7 +281,6 @@ function handlePass(room, teamIdx) {
     points: a.points
   });
 
-  // ابعت السؤال لفريق الفايز بس
   const winnerSockets = Object.values(room.players).filter(p => p.team === a.winnerTeam);
   winnerSockets.forEach(p => {
     io.to(p.id).emit('show-question', {
@@ -315,12 +309,10 @@ function handleAnswer(room, teamIdx, isCorrect) {
     });
     endAuction(room);
   } else {
-    // عرض سرقة على الخصم
     const halfBid = Math.floor(a.currentBid / 2);
     const otherTeam = 1 - teamIdx;
 
     if (room.teams[otherTeam].balance < halfBid || halfBid < BID_STEP) {
-      // الخصم مش قادر يسرق
       io.to(room.code).emit('answer-result', {
         team: teamIdx, correct: false, reward: 0, isSteal: false
       });
@@ -352,12 +344,10 @@ function handleStealDecision(room, accept) {
     return;
   }
 
-  // اخصم سعر السرقة
   room.teams[a.stealTeam].balance -= a.stealPrice;
   a.phase = 'steal-answering';
   a.timeLeft = 30;
 
-  // ابعت السؤال لفريق السرقة بس
   const stealSockets = Object.values(room.players).filter(p => p.team === a.stealTeam);
   stealSockets.forEach(p => {
     io.to(p.id).emit('show-question', {
@@ -395,7 +385,6 @@ function endAuction(room) {
   stopAuctionTimer(room);
   room.auction = null;
 
-  // افحص الإفلاس
   const b0 = room.teams[0].balance;
   const b1 = room.teams[1].balance;
 
@@ -405,14 +394,11 @@ function endAuction(room) {
     return;
   }
 
-  // الجولة الجديدة
   room.round++;
   room.startingTeam = 1 - room.startingTeam;
 
-  // ابعت حالة جديدة
   broadcast(room);
 
-  // ابدأ الجولة الجديدة بعد شوية
   setTimeout(() => beginRound(room), 1500);
 }
 
@@ -420,19 +406,18 @@ function endAuction(room) {
    🔌 Socket handlers
    ═══════════════════════════════════════════════════════════════ */
 io.on('connection', (socket) => {
-  socket.on('create-room', ({ name, teamSize, teamNames }, cb) => {
+  socket.on('create-room', ({ name }, cb) => {
     let code;
     do { code = generateCode(); } while (rooms.has(code));
 
     const room = {
       code,
       hostId: socket.id,
-      teamSize: parseInt(teamSize) === 4 ? 4 : 2,
       status: 'lobby',
       players: {},
       teams: [
-        { name: sanitize(teamNames?.[0]) || 'الفريق الأول', balance: START_BALANCE },
-        { name: sanitize(teamNames?.[1]) || 'الفريق الثاني', balance: START_BALANCE }
+        { name: 'الفريق الأول', balance: START_BALANCE },
+        { name: 'الفريق الثاني', balance: START_BALANCE }
       ],
       categories: [],
       questions: [],
@@ -460,7 +445,7 @@ io.on('connection', (socket) => {
     const room = rooms.get(code);
     if (!room) return cb({ ok: false, error: 'الغرفة غير موجودة' });
     if (room.status !== 'lobby') return cb({ ok: false, error: 'اللعبة بدأت بالفعل' });
-    if (Object.keys(room.players).length >= room.teamSize) return cb({ ok: false, error: 'الغرفة ممتلئة' });
+    if (Object.keys(room.players).length >= 4) return cb({ ok: false, error: 'الغرفة ممتلئة (4 لاعبين)' });
 
     const counts = [0, 0];
     Object.values(room.players).forEach(p => counts[p.team]++);
@@ -477,11 +462,55 @@ io.on('connection', (socket) => {
     cb({ ok: true, code, room: publicRoom(room) });
   });
 
+  socket.on('swap-team', () => {
+    const room = rooms.get(socket.data.roomCode);
+    if (!room || room.status !== 'lobby') return;
+    const player = room.players[socket.id];
+    if (!player) return;
+
+    const newTeam = 1 - player.team;
+    const counts = [0, 0];
+    Object.values(room.players).forEach(p => { if (p.id !== socket.id) counts[p.team]++; });
+
+    if (counts[newTeam] >= 2) {
+      socket.emit('error-msg', 'الفريق التاني مليان');
+      return;
+    }
+
+    player.team = newTeam;
+    io.to(room.code).emit('room-update', publicRoom(room));
+  });
+
   socket.on('start-setup', () => {
     const room = rooms.get(socket.data.roomCode);
     if (!room || room.hostId !== socket.id) return;
-    if (Object.keys(room.players).length !== room.teamSize) return;
+
+    const total = Object.keys(room.players).length;
+
+    if (total < 2) {
+      socket.emit('error-msg', 'محتاج لاعب تاني على الأقل');
+      return;
+    }
+    if (total === 3) {
+      socket.emit('error-msg', 'ناقص واحد عشان تبدأ (محتاج 2 أو 4 لاعبين)');
+      return;
+    }
+    if (total !== 2 && total !== 4) {
+      socket.emit('error-msg', 'لازم 2 أو 4 لاعبين');
+      return;
+    }
+
+    const counts = [0, 0];
+    Object.values(room.players).forEach(p => counts[p.team]++);
+    const perTeam = total / 2;
+    if (counts[0] !== perTeam || counts[1] !== perTeam) {
+      socket.emit('error-msg', `الفريقين مش متوازنين — لازم ${perTeam} في كل فريق`);
+      return;
+    }
+
     room.status = 'setup';
+    room.teams[0].balance = START_BALANCE;
+    room.teams[1].balance = START_BALANCE;
     broadcast(room);
   });
 
@@ -610,7 +639,6 @@ io.on('connection', (socket) => {
     }
 
     if (room.hostId === socket.id) {
-      // انقل الاستضافة لأول لاعب
       room.hostId = Object.keys(room.players)[0];
     }
 
