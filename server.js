@@ -26,7 +26,7 @@ const CATEGORIES = {
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   🤖 توليد الأسئلة من Groq
+   🤖 توليد الأسئلة
    ═══════════════════════════════════════════════════════════════ */
 async function generateQuestions(catIds) {
   if (!GROQ_KEY) throw new Error('GROQ_API_KEY missing');
@@ -34,18 +34,17 @@ async function generateQuestions(catIds) {
 
   const prompt = `أعد 5 أسئلة معلومات عامة بالعربية من الفئات التالية فقط: ${catList}.
 
-وزّع المستويات عشوائياً من: 200 (سهل)، 400 (متوسط)، 600 (صعب)، 800 (شبه مستحيل).
-
 شروط صارمة:
 - سؤال مفتوح بإجابة واحدة قصيرة ومحددة (اسم، رقم، تاريخ، مكان)
 - ممنوع تماماً أي اختيارات (أ-ب-ج-د) أو بدائل
 - ممنوع "اختر الإجابة الصحيحة"
 - الإجابة كلمة أو كلمتين أو رقم فقط
 - كل النصوص بالعربية الفصحى
+- نوّع في صعوبة الأسئلة (سهل، متوسط، صعب، صعب جدًا)
 - كل سؤال من فئة مختلفة عن التاني لو أمكن
 
 أعد JSON فقط:
-{"questions":[{"category":"كرة القدم","points":200,"question":"...","answer":"..."},{"category":"...","points":400,"question":"...","answer":"..."},{"category":"...","points":600,"question":"...","answer":"..."},{"category":"...","points":800,"question":"...","answer":"..."},{"category":"...","points":200,"question":"...","answer":"..."}]}`;
+{"questions":[{"category":"كرة القدم","question":"...","answer":"..."},{"category":"...","question":"...","answer":"..."},{"category":"...","question":"...","answer":"..."},{"category":"...","question":"...","answer":"..."},{"category":"...","question":"...","answer":"..."}]}`;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 60000);
@@ -79,7 +78,6 @@ async function generateQuestions(catIds) {
 
     return list.map(q => ({
       category: String(q.category || '').trim(),
-      points: [200, 400, 600, 800].includes(Number(q.points)) ? Number(q.points) : 400,
       question: String(q.question || '').trim(),
       answer: String(q.answer || '').trim()
     })).filter(q => q.question.length > 3 && q.answer.length > 0);
@@ -89,7 +87,7 @@ async function generateQuestions(catIds) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   🏠 إدارة الغرف
+   🏠 الغرف
    ═══════════════════════════════════════════════════════════════ */
 const rooms = new Map();
 
@@ -117,10 +115,8 @@ function publicRoom(room) {
     round: room.round,
     startingTeam: room.startingTeam,
     loading: room.loading,
-    totalQuestions: room.questions.length + room.usedCount,
     auction: room.auction ? {
       category: room.auction.category,
-      points: room.auction.points,
       currentBid: room.auction.currentBid,
       lastBidder: room.auction.lastBidder,
       activeTeam: room.auction.activeTeam,
@@ -139,7 +135,7 @@ function broadcast(room) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   🎯 منطق المزاد
+   🎯 المزاد
    ═══════════════════════════════════════════════════════════════ */
 function startAuctionTimer(room) {
   stopAuctionTimer(room);
@@ -170,21 +166,15 @@ function handleTimeout(room) {
   const a = room.auction;
   if (!a) return;
 
-  if (a.phase === 'bidding') {
-    handlePass(room, a.activeTeam);
-  } else if (a.phase === 'answering') {
-    handleAnswer(room, a.winnerTeam, false);
-  } else if (a.phase === 'steal-answering') {
-    handleStealAnswer(room, false);
-  } else if (a.phase === 'steal-offer') {
-    handleStealDecision(room, false);
-  }
+  if (a.phase === 'bidding') handlePass(room, a.activeTeam);
+  else if (a.phase === 'answering') handleAnswer(room, a.winnerTeam, false);
+  else if (a.phase === 'steal-answering') handleStealAnswer(room, false);
+  else if (a.phase === 'steal-offer') handleStealDecision(room, false);
 }
 
 function nextQuestionFromQueue(room) {
   if (room.questions.length === 0) return null;
   const q = room.questions.shift();
-  room.usedCount++;
   if (room.questions.length <= BATCH_SIZE - REFILL_AT && !room.loading) {
     refillQuestions(room);
   }
@@ -217,7 +207,6 @@ function beginRound(room) {
 
   room.auction = {
     category: q.category,
-    points: q.points,
     question: q.question,
     answer: q.answer,
     currentBid: 0,
@@ -277,8 +266,7 @@ function handlePass(room, teamIdx) {
   io.to(room.code).emit('auction-won', {
     winnerTeam: a.winnerTeam,
     bid: a.currentBid,
-    category: a.category,
-    points: a.points
+    category: a.category
   });
 
   const winnerSockets = Object.values(room.players).filter(p => p.team === a.winnerTeam);
@@ -398,7 +386,6 @@ function endAuction(room) {
   room.startingTeam = 1 - room.startingTeam;
 
   broadcast(room);
-
   setTimeout(() => beginRound(room), 1500);
 }
 
@@ -421,7 +408,6 @@ io.on('connection', (socket) => {
       ],
       categories: [],
       questions: [],
-      usedCount: 0,
       round: 1,
       startingTeam: 0,
       auction: null,
@@ -495,10 +481,6 @@ io.on('connection', (socket) => {
       socket.emit('error-msg', 'ناقص واحد عشان تبدأ (محتاج 2 أو 4 لاعبين)');
       return;
     }
-    if (total !== 2 && total !== 4) {
-      socket.emit('error-msg', 'لازم 2 أو 4 لاعبين');
-      return;
-    }
 
     const counts = [0, 0];
     Object.values(room.players).forEach(p => counts[p.team]++);
@@ -517,9 +499,9 @@ io.on('connection', (socket) => {
   socket.on('set-categories', ({ categories }) => {
     const room = rooms.get(socket.data.roomCode);
     if (!room || room.hostId !== socket.id) return;
-    if (!Array.isArray(categories) || categories.length < 3) return;
+    if (!Array.isArray(categories) || categories.length < 1) return;
     room.categories = categories.filter(c => CATEGORIES[c]);
-    if (room.categories.length < 3) return;
+    if (room.categories.length < 1) return;
     startGame(room);
   });
 
@@ -528,7 +510,6 @@ io.on('connection', (socket) => {
     room.round = 1;
     room.startingTeam = 0;
     room.questions = [];
-    room.usedCount = 0;
     room.teams[0].balance = START_BALANCE;
     room.teams[1].balance = START_BALANCE;
     room.loading = true;
@@ -618,7 +599,6 @@ io.on('connection', (socket) => {
     room.teams[0].balance = START_BALANCE;
     room.teams[1].balance = START_BALANCE;
     room.questions = [];
-    room.usedCount = 0;
     room.auction = null;
     room.round = 1;
     room.startingTeam = 0;
