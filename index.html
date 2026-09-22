@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0d0618">
+<title>💰 المزاد</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg-deep:#0a0412;--bg-purple:#1a0b2e;--violet:#C084FC;--gold:#FBBF24;--green:#22C55E;--red:#EF4444;--text:#F4F4F5;--muted:#A1A1AA;--team1:#06B6D4;--team1-glow:rgba(6,182,212,0.55);--team2:#EC4899;--team2-glow:rgba(236,72,153,0.55);--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;inset:0;font-family:'Cairo',sans-serif;color:var(--text);background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(139,92,246,0.18),transparent 60%),radial-gradient(ellipse 70% 50% at 50% 100%,rgba(236,72,153,0.12),transparent 60%),linear-gradient(180deg,var(--bg-deep) 0%,var(--bg-purple) 50%,var(--bg-deep) 100%);user-select:none;-webkit-user-select:none;overscroll-behavior:none}
+.screen{position:absolute;inset:0;width:100%;height:100%;display:none;flex-direction:column;overflow:hidden;padding:calc(var(--safe-top) + 12px) 14px calc(var(--safe-bottom) + 12px)}
+.screen.active{display:flex}
+
+.btn{border:none;cursor:pointer;font-family:inherit;font-weight:900;color:#fff;transition:transform .12s ease,opacity .15s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:16px;font-size:15px}
+.btn:active{transform:scale(0.97)}
+.btn:disabled{opacity:0.35;cursor:not-allowed}
+.btn-primary{background:linear-gradient(90deg,#F43F5E,#EC4899 55%,#8B5CF6);box-shadow:0 0 22px rgba(236,72,153,0.45)}
+.btn-ghost{background:rgba(255,255,255,0.04);border:1.5px solid rgba(196,132,252,0.35);color:#E9D5FF}
+.btn-success{background:linear-gradient(135deg,#22C55E,#15803D);box-shadow:0 0 20px rgba(34,197,94,0.5)}
+.btn-danger{background:linear-gradient(135deg,#EF4444,#991B1B);box-shadow:0 0 20px rgba(239,68,68,0.5)}
+.btn-gold{background:linear-gradient(135deg,#FBBF24,#D97706);box-shadow:0 0 22px rgba(251,191,36,0.5);color:#1a0b2e}
+
+.inp{width:100%;padding:16px 18px;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.12);border-radius:16px;color:#fff;font-family:inherit;font-size:16px;font-weight:700;outline:none;text-align:center}
+.inp::placeholder{color:#52525B;font-weight:400}
+.inp:focus{border-color:rgba(196,132,252,0.7);box-shadow:0 0 0 3px rgba(139,92,246,0.18)}
+.inp-ltr{direction:ltr;letter-spacing:4px;font-weight:900;text-transform:uppercase;font-size:18px}
+
+/* ═══ Home ═══ */
+#screen-home{align-items:center;overflow-y:auto;padding-top:calc(var(--safe-top) + 24px);padding-bottom:calc(var(--safe-bottom) + 24px)}
+.home-wrap{width:100%;max-width:420px;display:flex;flex-direction:column;gap:18px;margin:auto 0}
+.brand-title{font-size:clamp(36px,10vw,52px);font-weight:900;line-height:1.1;background:linear-gradient(90deg,#FB7185,#EC4899,#C084FC,#8B5CF6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px rgba(236,72,153,0.5));text-align:center}
+.brand-sub{font-size:14px;font-weight:800;color:#A1A1AA;text-align:center;letter-spacing:1px;margin-top:-10px}
+.home-form{display:flex;flex-direction:column;gap:12px}
+.home-form .inp{background:rgba(255,255,255,0.03)}
+.divider{display:flex;align-items:center;justify-content:center;gap:10px;color:#52525B;font-size:13px;font-weight:900;margin:4px 0}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(196,132,252,0.2),transparent)}
+.divider span{padding:0 4px}
+
+.rules-toggle-area{text-align:center;margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.rules-hint{font-size:12px;font-weight:800;color:#A1A1AA}
+.rules-arrow{font-size:20px;color:#52525B;line-height:1;animation:bounceArrow 1.5s ease-in-out infinite}
+@keyframes bounceArrow{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+.btn-rules{background:rgba(139,92,246,0.1);border:1.5px solid rgba(196,132,252,0.35);color:#E9D5FF;padding:12px 24px;border-radius:14px;font-family:inherit;font-weight:900;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.btn-rules:active{transform:scale(0.97)}
+
+/* ═══ Rules Modal ═══ */
+.rules-overlay{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(5,2,12,0.94);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  overflow-y:auto;
+}
+.rules-overlay.show{display:flex !important}
+.rules-modal-box{
+  width:100%;
+  max-width:460px;
+  background:linear-gradient(160deg,rgba(26,11,46,0.98),rgba(14,8,25,0.99));
+  border:1.5px solid rgba(196,132,252,0.4);
+  border-radius:22px;
+  padding:22px;
+  box-shadow:0 0 60px rgba(139,92,246,0.4);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  max-height:calc(100dvh - 40px);
+  overflow-y:auto;
+  animation:rulesPop .3s;
+}
+@keyframes rulesPop{from{transform:scale(0.9);opacity:0}to{transform:scale(1);opacity:1}}
+.rules-modal-title{
+  font-size:20px;
+  font-weight:900;
+  text-align:center;
+  background:linear-gradient(90deg,#FB7185,#C084FC);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  margin-bottom:4px;
+}
+.rules-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.rules-list li{display:flex;align-items:flex-start;gap:10px;font-size:13px;font-weight:700;line-height:1.65;color:#D4D4D8;background:rgba(0,0,0,0.25);padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.05)}
+.rules-list li .r-icon{font-size:18px;line-height:1.5;flex-shrink:0}
+.rules-list li strong{color:var(--gold)}
+.rules-close-btn{margin-top:6px;width:100%;padding:14px;border-radius:14px;background:linear-gradient(90deg,#8B5CF6,#EC4899);border:none;color:#fff;font-family:inherit;font-weight:900;font-size:15px;cursor:pointer}
+.rules-close-btn:active{transform:scale(0.97)}
+
+/* ═══ Lobby ═══ */
+#screen-lobby{gap:12px}
+.lobby-header{display:flex;justify-content:space-between;align-items:center;background:rgba(20,20,26,0.7);border:1px solid rgba(196,132,252,0.15);border-radius:14px;padding:10px 14px}
+.lobby-code-label{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--muted);margin-bottom:2px}
+.lobby-code{font-size:20px;font-weight:900;letter-spacing:4px;color:var(--gold);text-shadow:0 0 12px rgba(251,191,36,0.5);direction:ltr}
+.lobby-copy{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:10px;padding:6px 10px;font-family:inherit;font-weight:800;font-size:12px;cursor:pointer}
+.lobby-teams{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1;min-height:0}
+.lobby-team{padding:12px 10px;border-radius:16px;background:rgba(255,255,255,0.02);border:1.5px solid transparent;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto}
+.lobby-team.team1{border-color:rgba(6,182,212,0.3)}
+.lobby-team.team2{border-color:rgba(236,72,153,0.3)}
+.lobby-team-title{font-size:14px;font-weight:900;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:center}
+.lobby-team.team1 .lobby-team-title{color:#A5F3FC}
+.lobby-team.team2 .lobby-team-title{color:#FBCFE8}
+.lobby-player{font-size:13px;font-weight:700;padding:10px 12px;background:rgba(0,0,0,0.35);border-radius:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.05)}
+.lobby-player .crown{color:var(--gold);font-size:14px}
+.lobby-player .me-badge{background:var(--gold);color:#1a0b2e;font-size:9px;font-weight:900;padding:2px 6px;border-radius:6px;margin-right:auto}
+.lobby-empty{font-size:11px;color:#52525B;font-weight:700;text-align:center;padding:10px;border:1.5px dashed rgba(255,255,255,0.1);border-radius:10px}
+.lobby-status{text-align:center;font-size:13px;font-weight:800;color:#A1A1AA;padding:10px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)}
+.lobby-status.ok{color:#BBF7D0;border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)}
+.lobby-status.warn{color:#FDE68A;border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.06)}
+.lobby-actions{display:flex;gap:8px;padding-top:4px}
+.lobby-actions .btn{flex:1}
+
+/* ═══ Setup ═══ */
+#screen-setup{gap:12px;justify-content:center;align-items:center}
+.setup-card{width:100%;max-width:460px;background:linear-gradient(160deg,rgba(139,92,246,0.06),rgba(20,20,26,0.55));border:1px solid rgba(196,132,252,0.18);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.setup-title{font-size:18px;font-weight:900;text-align:center;color:#E9D5FF}
+.setup-sub{font-size:12px;font-weight:700;text-align:center;color:#A1A1AA;line-height:1.6}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cat-card{padding:14px 10px;border-radius:14px;background:rgba(255,255,255,0.03);border:2px solid rgba(255,255,255,0.08);cursor:pointer;text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center;font-family:inherit;color:#fff;transition:all .15s}
+.cat-card .cat-icon{font-size:28px}
+.cat-card .cat-name{font-size:13px;font-weight:900}
+.cat-card.selected{border-color:var(--gold);background:rgba(251,191,36,0.1);box-shadow:0 0 18px rgba(251,191,36,0.25)}
+.cat-card.selected .cat-name{color:#FDE68A}
+
+/* ═══ Game ═══ */
+#screen-game{padding:calc(var(--safe-top) + 8px) 10px calc(var(--safe-bottom) + 8px);gap:8px}
+.top-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;background:rgba(20,20,26,0.75);border:1px solid rgba(196,132,252,0.15);border-radius:14px;padding:6px 8px}
+.balance-box{display:flex;flex-direction:column;gap:1px;padding:5px 8px;border-radius:10px;border:1.5px solid transparent;background:rgba(255,255,255,0.02);min-width:0;text-align:center}
+.balance-box.team1{border-color:rgba(6,182,212,0.25)}
+.balance-box.team2{border-color:rgba(236,72,153,0.25)}
+.balance-box.team1.active{border-color:var(--team1);background:rgba(6,182,212,0.1);box-shadow:0 0 14px var(--team1-glow)}
+.balance-box.team2.active{border-color:var(--team2);background:rgba(236,72,153,0.1);box-shadow:0 0 14px var(--team2-glow)}
+.balance-box .team-name-sm{font-size:10px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.balance-box.team1 .team-name-sm{color:#A5F3FC}
+.balance-box.team2 .team-name-sm{color:#FBCFE8}
+.balance-box .balance-num{font-size:16px;font-weight:900;color:var(--gold);display:flex;align-items:center;justify-content:center;gap:3px;text-shadow:0 0 8px rgba(251,191,36,0.4)}
+.balance-box .balance-num .coin{font-size:12px}
+.round-info{text-align:center;padding:4px 10px;border-radius:10px;background:rgba(139,92,246,0.1);border:1px solid rgba(196,132,252,0.3)}
+.round-info .ri-label{font-size:8px;font-weight:800;letter-spacing:1.5px;color:var(--muted)}
+.round-info .ri-num{font-size:14px;font-weight:900;color:#fff}
+
+.game-body{flex:1;min-height:0;display:grid;grid-template-rows:auto 1fr;gap:8px}
+.auction-area{display:flex;flex-direction:column;gap:8px;background:linear-gradient(160deg,rgba(139,92,246,0.08),rgba(20,20,26,0.55));border:1.5px solid rgba(196,132,252,0.25);border-radius:16px;padding:12px}
+.auction-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.auction-cat{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:900;color:var(--violet)}
+.auction-cat .ac-icon{font-size:18px}
+.auction-pts{font-size:14px;font-weight:900;padding:4px 12px;border-radius:12px;background:linear-gradient(135deg,#FBBF24,#D97706);color:#1a0b2e}
+.auction-bidbox{text-align:center;padding:10px;border-radius:14px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.06)}
+.auction-bidbox .ab-label{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--muted);margin-bottom:2px}
+.auction-bidbox .ab-value{font-size:26px;font-weight:900;color:var(--gold);text-shadow:0 0 12px rgba(251,191,36,0.5)}
+.auction-bidbox .ab-holder{font-size:11px;font-weight:800;color:#E9D5FF;margin-top:3px;min-height:14px}
+.auction-timer{text-align:center;font-size:12px;font-weight:900;padding:5px 10px;border-radius:10px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.4);color:#A5F3FC;min-width:70px;display:inline-block}
+.auction-timer.warn{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.55);color:#FCA5A5;animation:pulseTimer 1s ease-in-out infinite}
+@keyframes pulseTimer{0%,100%{opacity:1}50%{opacity:0.5}}
+.auction-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.auction-actions .btn{padding:12px;font-size:14px}
+.turn-hint{text-align:center;font-size:11px;font-weight:800;color:#A1A1AA}
+.turn-hint.yours{color:#FDE68A;text-shadow:0 0 8px rgba(251,191,36,0.4)}
+
+.question-area{background:linear-gradient(160deg,rgba(20,20,26,0.7),rgba(14,8,25,0.9));border:1.5px solid rgba(196,132,252,0.2);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.question-area.hidden{display:none}
+.q-role{padding:8px 12px;border-radius:12px;text-align:center;font-size:12px;font-weight:900}
+.q-role.team1{background:rgba(6,182,212,0.12);border:1.5px solid rgba(6,182,212,0.4);color:#A5F3FC}
+.q-role.team2{background:rgba(236,72,153,0.12);border:1.5px solid rgba(236,72,153,0.4);color:#FBCFE8}
+.q-role.steal{background:rgba(251,191,36,0.12);border:1.5px solid rgba(251,191,36,0.5);color:#FDE68A}
+.q-text{font-size:clamp(15px,3.8vw,18px);font-weight:900;line-height:1.55;text-align:center;padding:14px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px}
+.q-answer{font-size:clamp(13px,3.2vw,16px);font-weight:900;text-align:center;padding:10px;border-radius:12px;background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04));border:1.5px solid rgba(34,197,94,0.4);color:#BBF7D0;display:none}
+.q-answer.show{display:block}
+.q-answer .qa-label{font-size:10px;letter-spacing:2px;color:#86EFAC;display:block;margin-bottom:4px}
+.q-actions{display:flex;flex-direction:column;gap:8px;margin-top:auto}
+.q-actions .btn{padding:12px;font-size:14px}
+
+.waiting-area{background:rgba(20,20,26,0.6);border:1.5px dashed rgba(196,132,252,0.3);border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center}
+.waiting-area.hidden{display:none}
+.waiting-spinner{width:44px;height:44px;border-radius:50%;border:3px solid rgba(196,132,252,0.18);border-top-color:#C084FC;border-right-color:#EC4899;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.waiting-text{font-size:13px;font-weight:800;color:#A1A1AA}
+
+.chat-panel{background:rgba(20,20,26,0.8);border:1px solid rgba(196,132,252,0.15);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;max-height:36vh;min-height:140px}
+.chat-header{padding:6px 10px;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#A1A1AA;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center}
+.chat-msgs{flex:1;overflow-y:auto;padding:6px 8px;display:flex;flex-direction:column;gap:4px}
+.chat-msgs::-webkit-scrollbar{width:4px}
+.chat-msgs::-webkit-scrollbar-thumb{background:rgba(196,132,252,0.3);border-radius:2px}
+.chat-msg{font-size:12px;font-weight:700;line-height:1.4;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,0.03);word-wrap:break-word}
+.chat-msg .cm-name{font-weight:900;margin-left:6px}
+.chat-msg.team1 .cm-name{color:#67E8F9}
+.chat-msg.team2 .cm-name{color:#FBCFE8}
+.chat-form{display:flex;gap:6px;padding:6px;border-top:1px solid rgba(255,255,255,0.05)}
+.chat-input{flex:1;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:inherit;font-size:13px;font-weight:700;outline:none}
+.chat-input:focus{border-color:rgba(196,132,252,0.6)}
+.chat-send{padding:8px 12px;border-radius:10px;background:linear-gradient(135deg,#8B5CF6,#EC4899);border:none;color:#fff;font-family:inherit;font-weight:900;font-size:12px;cursor:pointer}
+
+#screen-final{justify-content:center;align-items:center;gap:14px}
+.final-card{width:100%;max-width:440px;background:linear-gradient(160deg,rgba(139,92,246,0.08),rgba(20,20,26,0.7));border:1.5px solid rgba(196,132,252,0.3);border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.final-trophy{font-size:56px;text-align:center;line-height:1;animation:bounce 1.6s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-8px) rotate(3deg)}}
+.final-title{text-align:center;font-size:20px;font-weight:900;background:linear-gradient(90deg,#FB7185,#C084FC);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.final-winner{text-align:center;font-size:16px;font-weight:900;color:var(--gold);text-shadow:0 0 14px rgba(251,191,36,0.5)}
+.final-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:14px;font-weight:900;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);gap:10px}
+.final-row.winner{background:linear-gradient(90deg,rgba(251,191,36,0.15),rgba(251,191,36,0.03));border:1.5px solid rgba(251,191,36,0.5)}
+.final-row .fr-name{font-size:14px;flex:1}
+.final-row .fr-score{font-size:18px;color:var(--gold)}
+
+.toast{position:fixed;top:calc(var(--safe-top) + 12px);left:50%;transform:translateX(-50%);background:rgba(20,20,26,0.95);border:1.5px solid rgba(196,132,252,0.4);color:#fff;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:900;z-index:9500;opacity:0;transition:opacity .3s;pointer-events:none;backdrop-filter:blur(10px);max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.toast.success{border-color:rgba(34,197,94,0.6);color:#BBF7D0}
+.toast.error{border-color:rgba(239,68,68,0.6);color:#FCA5A5}
+.toast.gold{border-color:rgba(251,191,36,0.6);color:#FDE68A}
+
+.big-event{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9000;pointer-events:none;background:rgba(5,2,12,0.75);backdrop-filter:blur(6px)}
+.big-event.show{display:flex;animation:fadeIn .2s}
+.big-event-box{padding:24px 32px;border-radius:22px;background:linear-gradient(160deg,rgba(26,11,46,0.96),rgba(14,8,25,0.98));border:2px solid rgba(251,191,36,0.5);text-align:center;box-shadow:0 0 60px rgba(251,191,36,0.3);animation:rulesPop .3s;max-width:90vw}
+.big-event-icon{font-size:48px;line-height:1;margin-bottom:8px}
+.big-event-text{font-size:20px;font-weight:900;color:#FDE68A}
+.big-event-sub{font-size:13px;font-weight:700;color:#A1A1AA;margin-top:6px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+@media (max-width:380px){
+  .auction-bidbox .ab-value{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ Home ═══ -->
+<div id="screen-home" class="screen active">
+  <div class="home-wrap">
+    <div class="brand-title">💰 المزاد</div>
+    <div class="brand-sub">لعبة أسئلة أونلاين</div>
+
+    <div class="home-form">
+      <input id="nameInput" class="inp" type="text" maxlength="12" placeholder="اسمك" autocomplete="off">
+      <button id="btnCreate" class="btn btn-primary" disabled type="button">🏠 إنشاء غرفة</button>
+
+      <div class="divider"><span>أو</span></div>
+
+      <input id="codeInput" class="inp inp-ltr" type="text" maxlength="6" placeholder="كود الغرفة (6 أرقام)" autocomplete="off">
+      <button id="btnJoin" class="btn btn-ghost" disabled type="button">🔗 الانضمام لغرفة</button>
+    </div>
+
+    <div class="rules-toggle-area">
+      <div class="rules-hint">لمعرفة قواعد اللعبة، اضغط هنا</div>
+      <div class="rules-arrow">↓</div>
+      <button id="btnRules" class="btn-rules" type="button">📖 قواعد اللعبة</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Rules Modal ═══ -->
+<div class="rules-overlay" id="rulesOverlay">
+  <div class="rules-modal-box">
+    <div class="rules-modal-title">📖 قواعد اللعبة</div>
+    <ul class="rules-list">
+      <li><span class="r-icon">🎯</span><div>كل فريق يبدأ بـ <strong>500 عملة</strong> — أول فريق يوصل صفر يخسر.</div></li>
+      <li><span class="r-icon">🎴</span><div>في كل جولة تشوفوا <strong>الفئة والمستوى</strong> بس، بدون السؤال.</div></li>
+      <li><span class="r-icon">💰</span><div>المزايدة تبدأ من <strong>100</strong>، وكل رفعة <strong>+100</strong> خلال 15 ثانية.</div></li>
+      <li><span class="r-icon">🏆</span><div>الفايز يدفع رهانه، ويشوف السؤال — لو جاوب <strong>صح</strong> ياخد ضعف المبلغ.</div></li>
+      <li><span class="r-icon">❌</span><div>لو غلط، الخصم يقدر يسرق السؤال بـ <strong>نصف المبلغ</strong> — ولو رفض، مفيش حاجة.</div></li>
+      <li><span class="r-icon">👀</span><div>الخصم <strong>مش هيشوف السؤال</strong> غير لما يقرر يسرق.</div></li>
+      <li><span class="r-icon">🔄</span><div>في اللوبي، تقدر تضغط <strong>"بدّل فريقك"</strong> وتنتقل للفريق التاني.</div></li>
+      <li><span class="r-icon">👥</span><div><strong>2 لاعبين</strong> = 1 ضد 1 &nbsp;•&nbsp; <strong>4 لاعبين</strong> = 2 ضد 2</div></li>
+    </ul>
+    <button class="rules-close-btn" id="btnCloseRules" type="button">فهمت، اقفل ✓</button>
+  </div>
+</div>
+
+<!-- ═══ Lobby ═══ -->
+<div id="screen-lobby" class="screen">
+  <div class="lobby-header">
+    <div>
+      <div class="lobby-code-label">كود الغرفة</div>
+      <div class="lobby-code" id="lobbyCode">------</div>
+    </div>
+    <button class="lobby-copy" id="btnCopy" type="button">📋 نسخ</button>
+  </div>
+
+  <div class="lobby-teams">
+    <div class="lobby-team team1">
+      <div class="lobby-team-title">🔵 الفريق الأول</div>
+      <div id="lobbyPlayers1"></div>
+    </div>
+    <div class="lobby-team team2">
+      <div class="lobby-team-title">🔴 الفريق الثاني</div>
+      <div id="lobbyPlayers2"></div>
+    </div>
+  </div>
+
+  <div class="lobby-status" id="lobbyStatus">في انتظار اللاعبين...</div>
+
+  <div class="lobby-actions">
+    <button id="btnSwapTeam" class="btn btn-ghost" type="button">🔄 بدّل فريقك</button>
+    <button id="btnStartSetup" class="btn btn-gold" disabled type="button">⚙️ اختر الفئات</button>
+  </div>
+</div>
+
+<!-- ═══ Setup ═══ -->
+<div id="screen-setup" class="screen">
+  <div class="setup-card">
+    <div class="setup-title">🎯 اختر 3 فئات من 4</div>
+    <div class="setup-sub">الأسئلة هتكون عشوائية من الفئات المختارة</div>
+    <div class="cat-grid" id="catGrid">
+      <button class="cat-card" data-cat="football" type="button"><span class="cat-icon">⚽</span><span class="cat-name">كرة القدم</span></button>
+      <button class="cat-card" data-cat="general_info" type="button"><span class="cat-icon">💡</span><span class="cat-name">معلومات عامة</span></button>
+      <button class="cat-card" data-cat="islamic" type="button"><span class="cat-icon">🕌</span><span class="cat-name">إسلاميات</span></button>
+      <button class="cat-card" data-cat="anime" type="button"><span class="cat-icon">🎌</span><span class="cat-name">الأنمي</span></button>
+    </div>
+    <button id="btnConfirmCats" class="btn btn-gold" disabled type="button">✅ ابدأ اللعبة</button>
+  </div>
+</div>
+
+<!-- ═══ Game ═══ -->
+<div id="screen-game" class="screen">
+  <div class="top-bar">
+    <div class="balance-box team1" id="balBox1">
+      <div class="team-name-sm" id="gName1">الفريق الأول</div>
+      <div class="balance-num"><span class="coin">🪙</span><span id="gBal1">500</span></div>
+    </div>
+    <div class="round-info">
+      <div class="ri-label">الجولة</div>
+      <div class="ri-num" id="gRound">1</div>
+    </div>
+    <div class="balance-box team2" id="balBox2">
+      <div class="team-name-sm" id="gName2">الفريق الثاني</div>
+      <div class="balance-num"><span class="coin">🪙</span><span id="gBal2">500</span></div>
+    </div>
+  </div>
+
+  <div class="game-body">
+    <div class="auction-area" id="auctionArea">
+      <div class="auction-head">
+        <div class="auction-cat"><span class="ac-icon" id="acIcon">🎯</span><span id="acName">—</span></div>
+        <div class="auction-pts" id="acPts">200</div>
+      </div>
+      <div class="auction-bidbox">
+        <div class="ab-label">أعلى مزايدة</div>
+        <div class="ab-value" id="abValue">0</div>
+        <div class="ab-holder" id="abHolder">لسه محدش زايد</div>
+      </div>
+      <div style="display:flex;justify-content:center">
+        <div class="auction-timer" id="aTimer">⏱ 15</div>
+      </div>
+      <div class="turn-hint" id="turnHint">—</div>
+      <div class="auction-actions">
+        <button class="btn btn-gold" id="btnBid" type="button">💰 زايد +100</button>
+        <button class="btn btn-ghost" id="btnPass" type="button">🚪 انسحب</button>
+      </div>
+    </div>
+
+    <div class="question-area hidden" id="questionArea">
+      <div class="q-role" id="qRole">—</div>
+      <div class="q-text" id="qText">—</div>
+      <div class="q-answer" id="qAnswer">
+        <span class="qa-label">الإجابة الصحيحة</span>
+        <span id="qAnswerText">—</span>
+      </div>
+      <div class="q-actions" id="qActions"></div>
+    </div>
+
+    <div class="waiting-area hidden" id="waitingArea">
+      <div class="waiting-spinner"></div>
+      <div class="waiting-text" id="waitingText">—</div>
+    </div>
+  </div>
+
+  <div class="chat-panel">
+    <div class="chat-header"><span>💬 الشات</span><span id="chatTeamLabel"></span></div>
+    <div class="chat-msgs" id="chatMsgs"></div>
+    <form class="chat-form" id="chatForm">
+      <input class="chat-input" id="chatInput" type="text" maxlength="200" placeholder="اكتب رسالتك..." autocomplete="off">
+      <button class="chat-send" type="submit">إرسال</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ Final ═══ -->
+<div id="screen-final" class="screen">
+  <div class="final-card">
+    <div class="final-trophy">🏆</div>
+    <div class="final-title">النتيجة النهائية</div>
+    <div class="final-winner" id="finalWinner">—</div>
+    <div id="finalScores"></div>
+    <button id="btnRestart" class="btn btn-gold" type="button">🔄 جولة جديدة</button>
+  </div>
+</div>
+
+<!-- Toast + Event overlay -->
+<div class="toast" id="toast"></div>
+<div class="big-event" id="bigEvent">
+  <div class="big-event-box">
+    <div class="big-event-icon" id="beIcon">🎉</div>
+    <div class="big-event-text" id="beText">—</div>
+    <div class="big-event-sub" id="beSub"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     قواعد اللعبة - بيشتغل حتى بدون سيرفر
+     (لازم يكون قبل Socket.IO عشان مايتأثرش بفشل التحميل)
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  var ro = document.getElementById('rulesOverlay');
+  var br = document.getElementById('btnRules');
+  var bc = document.getElementById('btnCloseRules');
+
+  if (br && ro) {
+    br.addEventListener('click', function() {
+      ro.classList.add('show');
+    });
+  }
+  if (bc && ro) {
+    bc.addEventListener('click', function() {
+      ro.classList.remove('show');
+    });
+  }
+  if (ro) {
+    ro.addEventListener('click', function(e) {
+      if (e.target === ro) ro.classList.remove('show');
+    });
+  }
+})();
+</script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+"use strict";
+
+const socket = io();
+const $ = (id) => document.getElementById(id);
+
+const state = {
+  me: null,
+  room: null,
+  myQuestionCtx: null
+};
+
+/* ═══ Helpers ═══ */
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $('screen-' + name).classList.add('active');
+}
+
+let toastTimer = null;
+function showToast(text, type = '') {
+  const t = $('toast');
+  t.textContent = text;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = 'toast ' + type, 2600);
+}
+
+let bigEventTimer = null;
+function showBigEvent(icon, text, sub = '') {
+  $('beIcon').textContent = icon;
+  $('beText').textContent = text;
+  $('beSub').textContent = sub;
+  $('bigEvent').classList.add('show');
+  clearTimeout(bigEventTimer);
+  bigEventTimer = setTimeout(() => $('bigEvent').classList.remove('show'), 2200);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+const CAT_ICONS = { 'كرة القدم': '⚽', 'معلومات عامة': '💡', 'إسلاميات': '🕌', 'الأنمي': '🎌' };
+function catIcon(name) { return CAT_ICONS[name] || '🎯'; }
+
+/* ═══ Home ═══ */
+const nameInput = $('nameInput');
+const codeInput = $('codeInput');
+const btnCreate = $('btnCreate');
+const btnJoin = $('btnJoin');
+
+function validateHome() {
+  const name = nameInput.value.trim();
+  const code = codeInput.value.trim().toUpperCase();
+  btnCreate.disabled = !name;
+  btnJoin.disabled = !(name && code.length === 6);
+}
+
+nameInput.addEventListener('input', validateHome);
+codeInput.addEventListener('input', e => {
+  e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  validateHome();
+});
+
+btnCreate.addEventListener('click', () => {
+  const name = nameInput.value.trim();
+  if (!name) return;
+  btnCreate.disabled = true;
+  btnCreate.textContent = '⏳ جاري الإنشاء...';
+  socket.emit('create-room', { name }, (res) => {
+    btnCreate.textContent = '🏠 إنشاء غرفة';
+    if (!res.ok) {
+      showToast(res.error || 'فشل', 'error');
+      validateHome();
+      return;
+    }
+    state.room = res.room;
+    state.me = findMe();
+    showScreen('lobby');
+    renderLobby();
+  });
+});
+
+btnJoin.addEventListener('click', () => {
+  const name = nameInput.value.trim();
+  const code = codeInput.value.trim().toUpperCase();
+  if (!name || code.length !== 6) return;
+  btnJoin.disabled = true;
+  btnJoin.textContent = '⏳ جاري الانضمام...';
+  socket.emit('join-room', { name, code }, (res) => {
+    btnJoin.textContent = '🔗 الانضمام لغرفة';
+    if (!res.ok) {
+      showToast(res.error || 'فشل', 'error');
+      validateHome();
+      return;
+    }
+    state.room = res.room;
+    state.me = findMe();
+    showScreen('lobby');
+    renderLobby();
+  });
+});
+
+/* ═══ Socket events ═══ */
+socket.on('room-update', (room) => {
+  state.room = room;
+  state.me = findMe();
+
+  if (room.status === 'lobby') { showScreen('lobby'); renderLobby(); }
+  else if (room.status === 'setup') { showScreen('setup'); renderSetup(); }
+  else if (room.status === 'playing') { renderGame(); }
+  else if (room.status === 'ended') { renderFinal(); }
+});
+
+socket.on('chat-msg', (msg) => appendChat(msg));
+
+socket.on('show-question', ({ question, answer, isSteal }) => {
+  state.myQuestionCtx = { question, answer, isSteal };
+  renderMyQuestion();
+});
+
+socket.on('answer-result', ({ team, correct, reward, isSteal }) => {
+  const teamName = state.room?.teams?.[team]?.name || '?';
+  if (correct) {
+    showBigEvent('✅', `${teamName} أجاب صح!`, `+${reward} 🪙${isSteal ? ' (سرقة)' : ''}`);
+  } else {
+    showBigEvent('❌', `${teamName} أجاب غلط`, isSteal ? 'خسر سعر السرقة' : '');
+  }
+  state.myQuestionCtx = null;
+  $('questionArea').classList.add('hidden');
+});
+
+socket.on('auction-won', ({ winnerTeam, bid }) => {
+  const teamName = state.room?.teams?.[winnerTeam]?.name || '?';
+  showBigEvent('🎯', `${teamName} فاز بالمزاد`, `دفع ${bid} 🪙`);
+});
+
+socket.on('steal-offer', () => {});
+
+socket.on('error-msg', (msg) => showToast(msg, 'error'));
+
+function findMe() {
+  if (!state.room) return null;
+  return state.room.players.find(p => p.id === socket.id) || null;
+}
+
+/* ═══ Lobby ═══ */
+$('btnCopy').addEventListener('click', () => {
+  if (!state.room) return;
+  navigator.clipboard.writeText(state.room.code).then(() => {
+    showToast('تم نسخ الكود ✓', 'success');
+  }).catch(() => showToast('فشل النسخ', 'error'));
+});
+
+$('btnSwapTeam').addEventListener('click', () => {
+  socket.emit('swap-team');
+});
+
+$('btnStartSetup').addEventListener('click', () => {
+  socket.emit('start-setup');
+});
+
+function renderLobby() {
+  const room = state.room;
+  if (!room) return;
+
+  $('lobbyCode').textContent = room.code;
+
+  const t1 = $('lobbyPlayers1');
+  const t2 = $('lobbyPlayers2');
+  t1.innerHTML = '';
+  t2.innerHTML = '';
+
+  const counts = [0, 0];
+  const sortedPlayers = [...room.players].sort((a, b) => {
+    if (a.id === room.hostId) return -1;
+    if (b.id === room.hostId) return 1;
+    return 0;
+  });
+
+  sortedPlayers.forEach(p => {
+    counts[p.team]++;
+    const el = document.createElement('div');
+    el.className = 'lobby-player';
+    const isHost = p.id === room.hostId;
+    const isMe = p.id === socket.id;
+    el.innerHTML = `
+      ${isHost ? '<span class="crown">👑</span>' : ''}
+      <span>${escapeHtml(p.name)}</span>
+      ${isMe ? '<span class="me-badge">أنت</span>' : ''}
+    `;
+    if (p.team === 0) t1.appendChild(el);
+    else t2.appendChild(el);
+  });
+
+  for (let i = counts[0]; i < 2; i++) {
+    const el = document.createElement('div');
+    el.className = 'lobby-empty';
+    el.textContent = '— فاضي —';
+    t1.appendChild(el);
+  }
+  for (let i = counts[1]; i < 2; i++) {
+    const el = document.createElement('div');
+    el.className = 'lobby-empty';
+    el.textContent = '— فاضي —';
+    t2.appendChild(el);
+  }
+
+  const total = room.players.length;
+  const isHost = state.me && state.me.id === room.hostId;
+
+  const status = $('lobbyStatus');
+  status.className = 'lobby-status';
+
+  if (total < 2) {
+    status.textContent = `⏳ محتاج لاعب تاني على الأقل (${total}/2)`;
+    $('btnStartSetup').disabled = true;
+  } else if (total === 2) {
+    status.textContent = '✅ جاهزين للعب 1 ضد 1!';
+    status.classList.add('ok');
+    $('btnStartSetup').disabled = !isHost;
+  } else if (total === 3) {
+    status.textContent = '⚠️ ناقص واحد (محتاج 2 أو 4 لاعبين)';
+    status.classList.add('warn');
+    $('btnStartSetup').disabled = !isHost;
+  } else if (total === 4) {
+    status.textContent = '✅ جاهزين للعب 2 ضد 2!';
+    status.classList.add('ok');
+    $('btnStartSetup').disabled = !isHost;
+  } else {
+    status.textContent = 'الغرفة ممتلئة';
+    $('btnStartSetup').disabled = true;
+  }
+}
+
+/* ═══ Setup ═══ */
+let selectedCats = new Set();
+
+document.querySelectorAll('.cat-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const cat = card.dataset.cat;
+    if (selectedCats.has(cat)) {
+      selectedCats.delete(cat);
+      card.classList.remove('selected');
+    } else {
+      if (selectedCats.size >= 3) {
+        showToast('اختر 3 فئات بس', 'error');
+        return;
+      }
+      selectedCats.add(cat);
+      card.classList.add('selected');
+    }
+    $('btnConfirmCats').disabled = selectedCats.size !== 3;
+  });
+});
+
+$('btnConfirmCats').addEventListener('click', () => {
+  if (selectedCats.size !== 3) return;
+  socket.emit('set-categories', { categories: Array.from(selectedCats) });
+});
+
+function renderSetup() {
+  const room = state.room;
+  if (!room) return;
+  const isHost = state.me && state.me.id === room.hostId;
+
+  if (!isHost) {
+    $('btnConfirmCats').disabled = true;
+    $('btnConfirmCats').textContent = '⏳ في انتظار صاحب الغرفة...';
+  } else {
+    $('btnConfirmCats').textContent = '✅ ابدأ اللعبة';
+    $('btnConfirmCats').disabled = selectedCats.size !== 3;
+  }
+}
+
+/* ═══ Game ═══ */
+function renderGame() {
+  const room = state.room;
+  if (!room) return;
+
+  if (!$('screen-game').classList.contains('active')) {
+    showScreen('game');
+    $('chatMsgs').innerHTML = '';
+    room.messages.forEach(m => appendChat(m));
+  }
+
+  $('gName1').textContent = room.teams[0].name;
+  $('gName2').textContent = room.teams[1].name;
+  $('gBal1').textContent = room.teams[0].balance;
+  $('gBal2').textContent = room.teams[1].balance;
+  $('gRound').textContent = room.round;
+
+  const a = room.auction;
+  const myTeam = state.me?.team ?? -1;
+
+  if (!a) {
+    $('auctionArea').classList.add('hidden');
+    $('questionArea').classList.add('hidden');
+    $('waitingArea').classList.remove('hidden');
+    $('waitingText').textContent = '⏳ جاري تجهيز الجولة القادمة...';
+    return;
+  }
+
+  const myTeamIsBidder = myTeam === a.activeTeam;
+  const iWon = myTeam === a.winnerTeam;
+  const iAmSteal = myTeam === a.stealTeam;
+
+  if (a.phase === 'bidding') {
+    $('auctionArea').classList.remove('hidden');
+    $('questionArea').classList.add('hidden');
+    $('waitingArea').classList.add('hidden');
+
+    $('acIcon').textContent = catIcon(a.category);
+    $('acName').textContent = a.category || '—';
+    $('acPts').textContent = a.points;
+
+    $('abValue').textContent = a.currentBid;
+    $('abHolder').textContent = a.lastBidder === -1
+      ? 'لسه محدش زايد'
+      : `${room.teams[a.lastBidder].name} متقدم`;
+
+    const t = $('aTimer');
+    t.textContent = '⏱ ' + a.timeLeft;
+    t.classList.toggle('warn', a.timeLeft <= 5);
+
+    $('balBox1').classList.toggle('active', a.activeTeam === 0);
+    $('balBox2').classList.toggle('active', a.activeTeam === 1);
+
+    const canBid = myTeamIsBidder && (room.teams[myTeam].balance >= a.currentBid + 100);
+    $('btnBid').disabled = !canBid;
+    $('btnBid').textContent = myTeamIsBidder
+      ? (canBid ? `💰 زايد +100 (${a.currentBid + 100})` : '🚫 مش معاك فلوس')
+      : `💰 دور ${room.teams[a.activeTeam].name}`;
+
+    $('btnPass').disabled = !myTeamIsBidder;
+
+    if (myTeamIsBidder) {
+      $('turnHint').textContent = '🎯 دورك دلوقتي — زايد أو انسحب';
+      $('turnHint').classList.add('yours');
+    } else {
+      $('turnHint').textContent = `🎯 دور ${room.teams[a.activeTeam].name}`;
+      $('turnHint').classList.remove('yours');
+    }
+    return;
+  }
+
+  $('auctionArea').classList.add('hidden');
+
+  const iShouldSeeQuestion =
+    (a.phase === 'answering' && iWon) ||
+    (a.phase === 'steal-answering' && iAmSteal);
+
+  const iShouldSeeWait =
+    (a.phase === 'answering' && !iWon) ||
+    (a.phase === 'steal-offer' && !iAmSteal) ||
+    (a.phase === 'steal-answering' && !iAmSteal);
+
+  if (iShouldSeeQuestion && state.myQuestionCtx) {
+    $('questionArea').classList.remove('hidden');
+    $('waitingArea').classList.add('hidden');
+    renderMyQuestion();
+  } else if (iShouldSeeWait) {
+    $('questionArea').classList.add('hidden');
+    $('waitingArea').classList.remove('hidden');
+
+    if (a.phase === 'answering') {
+      $('waitingText').textContent = `🎯 ${room.teams[a.winnerTeam].name} بيجاوب...`;
+    } else if (a.phase === 'steal-offer') {
+      $('waitingText').textContent = `⏳ في انتظار قرار ${room.teams[a.stealTeam].name}...`;
+    } else if (a.phase === 'steal-answering') {
+      $('waitingText').textContent = `🎯 ${room.teams[a.stealTeam].name} بيحاول يسرق...`;
+    }
+  } else {
+    $('questionArea').classList.add('hidden');
+    $('waitingArea').classList.add('hidden');
+  }
+
+  if (a.phase === 'steal-offer' && iAmSteal) {
+    $('questionArea').classList.remove('hidden');
+    $('waitingArea').classList.add('hidden');
+
+    const qa = $('qRole');
+    qa.className = 'q-role steal';
+    qa.textContent = `🎯 فرصة سرقة — ${room.teams[a.stealTeam].name}`;
+
+    $('qText').textContent = 'هل تريد سرقة السؤال؟';
+    $('qAnswer').classList.remove('show');
+
+    const actions = $('qActions');
+    actions.innerHTML = '';
+    const yes = document.createElement('button');
+    yes.type = 'button';
+    yes.className = 'btn btn-gold';
+    yes.textContent = `✅ نعم، ادفع ${a.stealPrice} 🪙`;
+    yes.disabled = room.teams[a.stealTeam].balance < a.stealPrice;
+    yes.onclick = () => socket.emit('steal-decision', { accept: true });
+
+    const no = document.createElement('button');
+    no.type = 'button';
+    no.className = 'btn btn-ghost';
+    no.textContent = '❌ لا، تخطى';
+    no.onclick = () => socket.emit('steal-decision', { accept: false });
+
+    actions.appendChild(yes);
+    actions.appendChild(no);
+  }
+
+  if ((a.phase === 'answering' && iWon) || (a.phase === 'steal-answering' && iAmSteal)) {
+    if (state.myQuestionCtx) renderMyQuestion();
+  }
+}
+
+function renderMyQuestion() {
+  const room = state.room;
+  if (!room || !state.myQuestionCtx) return;
+  const a = room.auction;
+  if (!a) return;
+
+  const ctx = state.myQuestionCtx;
+  const myTeam = state.me?.team ?? -1;
+
+  $('questionArea').classList.remove('hidden');
+  $('waitingArea').classList.add('hidden');
+
+  const role = $('qRole');
+  role.className = 'q-role ' + (ctx.isSteal ? 'steal' : `team${myTeam + 1}`);
+  if (ctx.isSteal) {
+    role.textContent = `🎯 فرصة سرقة — ${room.teams[myTeam].name} (${a.stealPrice} 🪙)`;
+  } else {
+    role.textContent = `🎯 ${room.teams[myTeam].name} — دورك (دفعت ${a.currentBid} 🪙)`;
+  }
+
+  $('qText').textContent = ctx.question;
+  $('qAnswerText').textContent = ctx.answer;
+  $('qAnswer').classList.remove('show');
+
+  const actions = $('qActions');
+  actions.innerHTML = '';
+
+  const btnShow = document.createElement('button');
+  btnShow.type = 'button';
+  btnShow.className = 'btn btn-ghost';
+  btnShow.textContent = '👁️ اعرض الإجابة';
+  btnShow.onclick = () => {
+    $('qAnswer').classList.add('show');
+    actions.removeChild(btnShow);
+  };
+
+  const btnCorrect = document.createElement('button');
+  btnCorrect.type = 'button';
+  btnCorrect.className = 'btn btn-success';
+  btnCorrect.textContent = '✅ إجابة صحيحة';
+  btnCorrect.onclick = () => {
+    if (ctx.isSteal) socket.emit('steal-answer', { correct: true });
+    else socket.emit('answer', { correct: true });
+  };
+
+  const btnWrong = document.createElement('button');
+  btnWrong.type = 'button';
+  btnWrong.className = 'btn btn-danger';
+  btnWrong.textContent = '❌ إجابة خاطئة';
+  btnWrong.onclick = () => {
+    if (ctx.isSteal) socket.emit('steal-answer', { correct: false });
+    else socket.emit('answer', { correct: false });
+  };
+
+  actions.appendChild(btnShow);
+  actions.appendChild(btnCorrect);
+  actions.appendChild(btnWrong);
+}
+
+$('btnBid').addEventListener('click', () => socket.emit('bid'));
+$('btnPass').addEventListener('click', () => socket.emit('pass'));
+
+/* ═══ Final ═══ */
+function renderFinal() {
+  const room = state.room;
+  if (!room) return;
+
+  const t1 = room.teams[0];
+  const t2 = room.teams[1];
+  let winnerIdx = -1;
+  if (t1.balance <= 0 && t2.balance > 0) winnerIdx = 1;
+  else if (t2.balance <= 0 && t1.balance > 0) winnerIdx = 0;
+  else if (t1.balance > t2.balance) winnerIdx = 0;
+  else if (t2.balance > t1.balance) winnerIdx = 1;
+
+  $('finalWinner').textContent = winnerIdx >= 0
+    ? `🏆 الفائز: ${room.teams[winnerIdx].name}`
+    : '🤝 تعادل';
+
+  const cont = $('finalScores');
+  cont.innerHTML = '';
+  const sorted = [{ idx: 0, t: t1 }, { idx: 1, t: t2 }].sort((a, b) => b.t.balance - a.t.balance);
+  sorted.forEach((entry, i) => {
+    const row = document.createElement('div');
+    row.className = 'final-row ' + (entry.idx === winnerIdx ? 'winner' : '');
+    row.innerHTML = `<div class="fr-name">${i === 0 && winnerIdx >= 0 ? '🥇' : i === 1 && winnerIdx >= 0 ? '🥈' : '🎖️'} ${escapeHtml(entry.t.name)}</div><div class="fr-score">🪙 ${entry.t.balance}</div>`;
+    cont.appendChild(row);
+  });
+
+  showScreen('final');
+}
+
+$('btnRestart').addEventListener('click', () => {
+  socket.emit('restart');
+  selectedCats.clear();
+  document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('selected'));
+  $('btnConfirmCats').disabled = true;
+  state.myQuestionCtx = null;
+});
+
+/* ═══ Chat ═══ */
+function appendChat(msg) {
+  const container = $('chatMsgs');
+  if (!container) return;
+  const el = document.createElement('div');
+  el.className = 'chat-msg team' + (msg.team + 1);
+  el.innerHTML = `<span class="cm-name">${escapeHtml(msg.name)}:</span>${escapeHtml(msg.text)}`;
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+}
+
+$('chatForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = $('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  socket.emit('chat', { text });
+  input.value = '';
+});
+
+socket.on('connect', () => console.log('✅ متصل'));
+socket.on('disconnect', () => showToast('انقطع الاتصال', 'error'));
+
+document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+</script>
+</body>
+</html>
