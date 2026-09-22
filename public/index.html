@@ -71,6 +71,12 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
 .lobby-team-title{font-size:14px;font-weight:900;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:center}
 .lobby-team.team1 .lobby-team-title{color:#A5F3FC}
 .lobby-team.team2 .lobby-team-title{color:#FBCFE8}
+
+.team-name-input{width:100%;padding:8px 10px;background:rgba(255,255,255,0.03);border:1.5px dashed rgba(196,132,252,0.4);border-radius:10px;color:#fff;font-family:inherit;font-size:12px;font-weight:800;outline:none;text-align:center}
+.team-name-input::placeholder{color:#52525B;font-weight:600;font-size:11px}
+.team-name-input:focus{border-color:rgba(196,132,252,0.8);border-style:solid;background:rgba(139,92,246,0.08)}
+.team-name-input:disabled{opacity:0.5}
+
 .lobby-player{font-size:13px;font-weight:700;padding:10px 12px;background:rgba(0,0,0,0.35);border-radius:10px;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.05)}
 .lobby-player .crown{color:var(--gold);font-size:14px}
 .lobby-player .me-badge{background:var(--gold);color:#1a0b2e;font-size:9px;font-weight:900;padding:2px 6px;border-radius:6px;margin-right:auto}
@@ -146,7 +152,7 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
 @keyframes spin{to{transform:rotate(360deg)}}
 .waiting-text{font-size:13px;font-weight:800;color:#A1A1AA}
 
-/* ═══ Chat - floating button + collapsible panel ═══ */
+/* ═══ Chat ═══ */
 .chat-fab{position:fixed;bottom:calc(var(--safe-bottom) + 16px);left:16px;z-index:7500;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#8B5CF6,#EC4899);border:none;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 6px 24px rgba(139,92,246,0.55);display:flex;align-items:center;justify-content:center;transition:transform .15s ease}
 .chat-fab:active{transform:scale(0.92)}
 .chat-fab .chat-badge{position:absolute;top:-2px;right:-2px;background:var(--red);color:#fff;font-size:10px;font-weight:900;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--bg-deep)}
@@ -238,6 +244,7 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
       <li><span class="r-icon">👀</span><div>الخصم <strong>مش هيشوف السؤال</strong> غير لما يقرر يسرق.</div></li>
       <li><span class="r-icon">🔄</span><div>في اللوبي، تقدر تضغط <strong>"بدّل فريقك"</strong> وتنتقل للفريق التاني.</div></li>
       <li><span class="r-icon">👥</span><div><strong>2 لاعبين</strong> = 1 ضد 1 &nbsp;•&nbsp; <strong>4 لاعبين</strong> = 2 ضد 2</div></li>
+      <li><span class="r-icon">🏷️</span><div>في 2 ضد 2، أول لاعب يدخل الفريق يقدر <strong>يسمّي فريقه</strong>.</div></li>
     </ul>
     <button class="rules-close-btn" id="btnCloseRules" type="button">فهمت، اقفل ✓</button>
   </div>
@@ -256,10 +263,12 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
   <div class="lobby-teams">
     <div class="lobby-team team1">
       <div class="lobby-team-title">🔵 الفريق الأول</div>
+      <input class="team-name-input" id="lobbyName1" type="text" maxlength="15" placeholder="اسم الفريق (اختياري)" autocomplete="off">
       <div id="lobbyPlayers1"></div>
     </div>
     <div class="lobby-team team2">
       <div class="lobby-team-title">🔴 الفريق الثاني</div>
+      <input class="team-name-input" id="lobbyName2" type="text" maxlength="15" placeholder="اسم الفريق (اختياري)" autocomplete="off">
       <div id="lobbyPlayers2"></div>
     </div>
   </div>
@@ -339,7 +348,7 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
   </div>
 </div>
 
-<!-- ═══ Chat FAB + Panel ═══ -->
+<!-- ═══ Chat ═══ -->
 <button class="chat-fab" id="chatFab" type="button" title="الشات">💬<span class="chat-badge" id="chatBadge"></span></button>
 <div class="chat-panel" id="chatPanel">
   <div class="chat-header">
@@ -540,6 +549,24 @@ $('btnCopy').addEventListener('click', () => {
 $('btnSwapTeam').addEventListener('click', () => socket.emit('swap-team'));
 $('btnStartSetup').addEventListener('click', () => socket.emit('start-setup'));
 
+/* team name inputs */
+let teamNameDebounce1 = null;
+let teamNameDebounce2 = null;
+$('lobbyName1').addEventListener('input', (e) => {
+  clearTimeout(teamNameDebounce1);
+  const val = e.target.value;
+  teamNameDebounce1 = setTimeout(() => {
+    socket.emit('set-team-name', { teamIdx: 0, name: val });
+  }, 400);
+});
+$('lobbyName2').addEventListener('input', (e) => {
+  clearTimeout(teamNameDebounce2);
+  const val = e.target.value;
+  teamNameDebounce2 = setTimeout(() => {
+    socket.emit('set-team-name', { teamIdx: 1, name: val });
+  }, 400);
+});
+
 function renderLobby() {
   const room = state.room;
   if (!room) return;
@@ -557,6 +584,10 @@ function renderLobby() {
     return 0;
   });
 
+  // جمع اللاعبين حسب الفريق بالترتيب
+  const playersTeam0 = [];
+  const playersTeam1 = [];
+
   sortedPlayers.forEach(p => {
     counts[p.team]++;
     const el = document.createElement('div');
@@ -568,8 +599,8 @@ function renderLobby() {
       <span>${escapeHtml(p.name)}</span>
       ${isMe ? '<span class="me-badge">أنت</span>' : ''}
     `;
-    if (p.team === 0) t1.appendChild(el);
-    else t2.appendChild(el);
+    if (p.team === 0) { playersTeam0.push(p); t1.appendChild(el); }
+    else { playersTeam1.push(p); t2.appendChild(el); }
   });
 
   for (let i = counts[0]; i < 2; i++) {
@@ -586,6 +617,56 @@ function renderLobby() {
   }
 
   const total = room.players.length;
+
+  // ═══ التحكم في خانة اسم الفريق ═══
+  const name1Input = $('lobbyName1');
+  const name2Input = $('lobbyName2');
+  const firstInTeam0 = playersTeam0[0];
+  const firstInTeam1 = playersTeam1[0];
+
+  // 1v1 (total == 2): اخفي الخانات
+  if (total <= 2) {
+    name1Input.style.display = 'none';
+    name2Input.style.display = 'none';
+  } else {
+    name1Input.style.display = '';
+    name2Input.style.display = '';
+
+    // قيمة الخانة من السيرفر (مع مراعاة عدم الكتابة فوق اللي بيكتبه المستخدم)
+    if (document.activeElement !== name1Input) {
+      name1Input.value = room.teamNames?.[0] || '';
+    }
+    if (document.activeElement !== name2Input) {
+      name2Input.value = room.teamNames?.[1] || '';
+    }
+
+    // الأول في الفريق بس يقدر يكتب
+    const amFirst0 = firstInTeam0 && firstInTeam0.id === socket.id;
+    const amFirst1 = firstInTeam1 && firstInTeam1.id === socket.id;
+
+    if (amFirst0) {
+      name1Input.disabled = false;
+      name1Input.placeholder = firstInTeam0.name + ' (اسم الفريق)';
+    } else if (firstInTeam0) {
+      name1Input.disabled = true;
+      name1Input.placeholder = firstInTeam0.name + ' (الأول بس يقدر يعدل)';
+    } else {
+      name1Input.disabled = true;
+      name1Input.placeholder = 'في انتظار لاعب...';
+    }
+
+    if (amFirst1) {
+      name2Input.disabled = false;
+      name2Input.placeholder = firstInTeam1.name + ' (اسم الفريق)';
+    } else if (firstInTeam1) {
+      name2Input.disabled = true;
+      name2Input.placeholder = firstInTeam1.name + ' (الأول بس يقدر يعدل)';
+    } else {
+      name2Input.disabled = true;
+      name2Input.placeholder = 'في انتظار لاعب...';
+    }
+  }
+
   const isHost = state.me && state.me.id === room.hostId;
   const status = $('lobbyStatus');
   status.className = 'lobby-status';
@@ -598,7 +679,7 @@ function renderLobby() {
     status.classList.add('ok');
     $('btnStartSetup').disabled = !isHost;
   } else if (total === 3) {
-    status.textContent = '⚠️ ناقص واحد (محتاج 2 أو 4 لاعبين)';
+    status.textContent = '⚠️ ناقص واحد (محتاج 2 أو 4 لاعبين) — اكتبوا اسم الفريق اللي فوق';
     status.classList.add('warn');
     $('btnStartSetup').disabled = !isHost;
   } else if (total === 4) {
@@ -611,7 +692,7 @@ function renderLobby() {
   }
 }
 
-/* ═══ Setup — 1 to 4 categories ═══ */
+/* ═══ Setup ═══ */
 let selectedCats = new Set();
 
 document.querySelectorAll('.cat-card').forEach(card => {
