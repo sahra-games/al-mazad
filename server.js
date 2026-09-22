@@ -102,6 +102,10 @@ function sanitize(str, max = 20) {
   return String(str || '').slice(0, max).replace(/[<>&"']/g, '');
 }
 
+function firstPlayerInTeam(room, teamIdx) {
+  return Object.values(room.players).find(p => p.team === teamIdx) || null;
+}
+
 function publicRoom(room) {
   return {
     code: room.code,
@@ -111,6 +115,7 @@ function publicRoom(room) {
       id: p.id, name: p.name, team: p.team
     })),
     teams: room.teams,
+    teamNames: room.teamNames || ['', ''],
     categories: room.categories,
     round: room.round,
     startingTeam: room.startingTeam,
@@ -132,6 +137,25 @@ function publicRoom(room) {
 
 function broadcast(room) {
   io.to(room.code).emit('room-update', publicRoom(room));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   🏷️ حساب أسماء الفريقين النهائية
+   - 1v1: اسم اللاعب
+   - 2v2: الاسم المخصص أو اسم أول لاعب
+   ═══════════════════════════════════════════════════════════════ */
+function computeFinalTeamNames(room) {
+  const total = Object.keys(room.players).length;
+  const teams0 = Object.values(room.players).filter(p => p.team === 0);
+  const teams1 = Object.values(room.players).filter(p => p.team === 1);
+
+  if (total === 2) {
+    room.teams[0].name = teams0[0]?.name || 'الفريق الأول';
+    room.teams[1].name = teams1[0]?.name || 'الفريق الثاني';
+  } else {
+    room.teams[0].name = (room.teamNames[0] || teams0[0]?.name || 'الفريق الأول');
+    room.teams[1].name = (room.teamNames[1] || teams1[0]?.name || 'الفريق الثاني');
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -406,6 +430,7 @@ io.on('connection', (socket) => {
         { name: 'الفريق الأول', balance: START_BALANCE },
         { name: 'الفريق الثاني', balance: START_BALANCE }
       ],
+      teamNames: ['', ''],
       categories: [],
       questions: [],
       round: 1,
@@ -467,6 +492,20 @@ io.on('connection', (socket) => {
     io.to(room.code).emit('room-update', publicRoom(room));
   });
 
+  socket.on('set-team-name', ({ teamIdx, name }) => {
+    const room = rooms.get(socket.data.roomCode);
+    if (!room || room.status !== 'lobby') return;
+    const player = room.players[socket.id];
+    if (!player || player.team !== teamIdx) return;
+
+    // بس أول لاعب في الفريق
+    const first = firstPlayerInTeam(room, teamIdx);
+    if (!first || first.id !== socket.id) return;
+
+    room.teamNames[teamIdx] = sanitize(name, 15);
+    io.to(room.code).emit('room-update', publicRoom(room));
+  });
+
   socket.on('start-setup', () => {
     const room = rooms.get(socket.data.roomCode);
     if (!room || room.hostId !== socket.id) return;
@@ -489,6 +528,9 @@ io.on('connection', (socket) => {
       socket.emit('error-msg', `الفريقين مش متوازنين — لازم ${perTeam} في كل فريق`);
       return;
     }
+
+    // احسب الأسماء النهائية
+    computeFinalTeamNames(room);
 
     room.status = 'setup';
     room.teams[0].balance = START_BALANCE;
@@ -598,6 +640,9 @@ io.on('connection', (socket) => {
     room.status = 'lobby';
     room.teams[0].balance = START_BALANCE;
     room.teams[1].balance = START_BALANCE;
+    room.teams[0].name = 'الفريق الأول';
+    room.teams[1].name = 'الفريق الثاني';
+    room.teamNames = ['', ''];
     room.questions = [];
     room.auction = null;
     room.round = 1;
