@@ -15,6 +15,7 @@ const GROQ_KEY = process.env.GROQ_API_KEY;
 const AUCTION_TIME = 15;
 const BID_STEP = 100;
 const START_BALANCE = 500;
+const MAX_BID = 500;
 const BATCH_SIZE = 5;
 const REFILL_AT = 4;
 
@@ -139,11 +140,6 @@ function broadcast(room) {
   io.to(room.code).emit('room-update', publicRoom(room));
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   🏷️ حساب أسماء الفريقين النهائية
-   - 1v1: اسم اللاعب
-   - 2v2: الاسم المخصص أو اسم أول لاعب
-   ═══════════════════════════════════════════════════════════════ */
 function computeFinalTeamNames(room) {
   const total = Object.keys(room.players).length;
   const teams0 = Object.values(room.players).filter(p => p.team === 0);
@@ -189,11 +185,8 @@ function stopAuctionTimer(room) {
 function handleTimeout(room) {
   const a = room.auction;
   if (!a) return;
-
+  // المؤقت شغال بس في مرحلة المزايدة
   if (a.phase === 'bidding') handlePass(room, a.activeTeam);
-  else if (a.phase === 'answering') handleAnswer(room, a.winnerTeam, false);
-  else if (a.phase === 'steal-answering') handleStealAnswer(room, false);
-  else if (a.phase === 'steal-offer') handleStealDecision(room, false);
 }
 
 function nextQuestionFromQueue(room) {
@@ -254,6 +247,9 @@ function handleBid(room, teamIdx) {
   if (teamIdx !== a.activeTeam) return;
 
   const nextBid = a.currentBid + BID_STEP;
+
+  // ⛔ حد أقصى للمزايدة
+  if (nextBid > MAX_BID) return;
   if (nextBid > room.teams[teamIdx].balance) return;
 
   a.currentBid = nextBid;
@@ -285,7 +281,7 @@ function handlePass(room, teamIdx) {
 
   room.teams[a.winnerTeam].balance -= a.currentBid;
   a.phase = 'answering';
-  a.timeLeft = 30;
+  // ⏱️ مفيش مؤقت هنا — خد وقتك في الإجابة
 
   io.to(room.code).emit('auction-won', {
     winnerTeam: a.winnerTeam,
@@ -303,7 +299,7 @@ function handlePass(room, teamIdx) {
   });
 
   broadcast(room);
-  startAuctionTimer(room);
+  // ❌ مفيش startAuctionTimer هنا
 }
 
 function handleAnswer(room, teamIdx, isCorrect) {
@@ -338,7 +334,7 @@ function handleAnswer(room, teamIdx, isCorrect) {
     a.timeLeft = 15;
     broadcast(room);
     io.to(room.code).emit('steal-offer', { team: otherTeam, price: halfBid });
-    startAuctionTimer(room);
+    startAuctionTimer(room); // المزايدة للسرقة عايزة تايم 15 ث (قرار الموافقة/الرفض)
   }
 }
 
@@ -358,7 +354,7 @@ function handleStealDecision(room, accept) {
 
   room.teams[a.stealTeam].balance -= a.stealPrice;
   a.phase = 'steal-answering';
-  a.timeLeft = 30;
+  // ⏱️ مفيش مؤقت هنا
 
   const stealSockets = Object.values(room.players).filter(p => p.team === a.stealTeam);
   stealSockets.forEach(p => {
@@ -370,7 +366,7 @@ function handleStealDecision(room, accept) {
   });
 
   broadcast(room);
-  startAuctionTimer(room);
+  // ❌ مفيش startAuctionTimer
 }
 
 function handleStealAnswer(room, isCorrect) {
@@ -498,7 +494,6 @@ io.on('connection', (socket) => {
     const player = room.players[socket.id];
     if (!player || player.team !== teamIdx) return;
 
-    // بس أول لاعب في الفريق
     const first = firstPlayerInTeam(room, teamIdx);
     if (!first || first.id !== socket.id) return;
 
@@ -529,7 +524,6 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // احسب الأسماء النهائية
     computeFinalTeamNames(room);
 
     room.status = 'setup';
