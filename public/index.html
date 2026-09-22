@@ -238,7 +238,9 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
     <ul class="rules-list">
       <li><span class="r-icon">🎯</span><div>كل فريق يبدأ بـ <strong>500 عملة</strong> — أول فريق يوصل صفر يخسر.</div></li>
       <li><span class="r-icon">🎴</span><div>في كل جولة تشوفوا <strong>الفئة بس</strong>، والسؤال بيتكشف بعد المزاد.</div></li>
-      <li><span class="r-icon">💰</span><div>المزايدة تبدأ من <strong>100</strong>، وكل رفعة <strong>+100</strong> خلال 15 ثانية.</div></li>
+      <li><span class="r-icon">💰</span><div>المزايدة تبدأ من <strong>100</strong>، وكل رفعة <strong>+100</strong>، بحد أقصى <strong>500</strong> للمزايدة.</div></li>
+      <li><span class="r-icon">⏱️</span><div>وقت المزايدة <strong>15 ثانية</strong> لكل رفعة.</div></li>
+      <li><span class="r-icon">🧠</span><div>وقت الإجابة <strong>مفتوح</strong> — خد وقتك كامل في قراءة السؤال والتفكير، مفيش عداد.</div></li>
       <li><span class="r-icon">🏆</span><div>الفايز يدفع رهانه، ويشوف السؤال — لو جاوب <strong>صح</strong> ياخد ضعف المبلغ.</div></li>
       <li><span class="r-icon">❌</span><div>لو غلط، الخصم يقدر يسرق السؤال بـ <strong>نصف المبلغ</strong> — ولو رفض، مفيش حاجة.</div></li>
       <li><span class="r-icon">👀</span><div>الخصم <strong>مش هيشوف السؤال</strong> غير لما يقرر يسرق.</div></li>
@@ -549,7 +551,6 @@ $('btnCopy').addEventListener('click', () => {
 $('btnSwapTeam').addEventListener('click', () => socket.emit('swap-team'));
 $('btnStartSetup').addEventListener('click', () => socket.emit('start-setup'));
 
-/* team name inputs */
 let teamNameDebounce1 = null;
 let teamNameDebounce2 = null;
 $('lobbyName1').addEventListener('input', (e) => {
@@ -584,7 +585,6 @@ function renderLobby() {
     return 0;
   });
 
-  // جمع اللاعبين حسب الفريق بالترتيب
   const playersTeam0 = [];
   const playersTeam1 = [];
 
@@ -617,14 +617,11 @@ function renderLobby() {
   }
 
   const total = room.players.length;
-
-  // ═══ التحكم في خانة اسم الفريق ═══
   const name1Input = $('lobbyName1');
   const name2Input = $('lobbyName2');
   const firstInTeam0 = playersTeam0[0];
   const firstInTeam1 = playersTeam1[0];
 
-  // 1v1 (total == 2): اخفي الخانات
   if (total <= 2) {
     name1Input.style.display = 'none';
     name2Input.style.display = 'none';
@@ -632,7 +629,6 @@ function renderLobby() {
     name1Input.style.display = '';
     name2Input.style.display = '';
 
-    // قيمة الخانة من السيرفر (مع مراعاة عدم الكتابة فوق اللي بيكتبه المستخدم)
     if (document.activeElement !== name1Input) {
       name1Input.value = room.teamNames?.[0] || '';
     }
@@ -640,7 +636,6 @@ function renderLobby() {
       name2Input.value = room.teamNames?.[1] || '';
     }
 
-    // الأول في الفريق بس يقدر يكتب
     const amFirst0 = firstInTeam0 && firstInTeam0.id === socket.id;
     const amFirst1 = firstInTeam1 && firstInTeam1.id === socket.id;
 
@@ -779,11 +774,20 @@ function renderGame() {
     $('balBox1').classList.toggle('active', a.activeTeam === 0);
     $('balBox2').classList.toggle('active', a.activeTeam === 1);
 
-    const canBid = myTeamIsBidder && (room.teams[myTeam].balance >= a.currentBid + 100);
+    const MAX_BID = 500;
+    const nextBid = a.currentBid + 100;
+    const overMax = nextBid > MAX_BID;
+    const overBalance = nextBid > room.teams[myTeam].balance;
+    const canBid = myTeamIsBidder && !overMax && !overBalance;
+
     $('btnBid').disabled = !canBid;
-    $('btnBid').textContent = myTeamIsBidder
-      ? (canBid ? `💰 زايد +100 (${a.currentBid + 100})` : '🚫 مش معاك فلوس')
-      : `💰 دور ${room.teams[a.activeTeam].name}`;
+    if (myTeamIsBidder) {
+      if (overMax) $('btnBid').textContent = '🚫 وصلنا الحد الأقصى (500)';
+      else if (overBalance) $('btnBid').textContent = '🚫 مش معاك فلوس';
+      else $('btnBid').textContent = `💰 زايد +100 (${nextBid})`;
+    } else {
+      $('btnBid').textContent = `💰 دور ${room.teams[a.activeTeam].name}`;
+    }
 
     $('btnPass').disabled = !myTeamIsBidder;
 
