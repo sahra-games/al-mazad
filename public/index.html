@@ -46,45 +46,11 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
 .btn-rules:active{transform:scale(0.97)}
 
 /* ═══ Rules Modal ═══ */
-.rules-overlay{
-  position:fixed;
-  inset:0;
-  z-index:9999;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:rgba(5,2,12,0.94);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  overflow-y:auto;
-}
+.rules-overlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(5,2,12,0.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);overflow-y:auto}
 .rules-overlay.show{display:flex !important}
-.rules-modal-box{
-  width:100%;
-  max-width:460px;
-  background:linear-gradient(160deg,rgba(26,11,46,0.98),rgba(14,8,25,0.99));
-  border:1.5px solid rgba(196,132,252,0.4);
-  border-radius:22px;
-  padding:22px;
-  box-shadow:0 0 60px rgba(139,92,246,0.4);
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  max-height:calc(100dvh - 40px);
-  overflow-y:auto;
-  animation:rulesPop .3s;
-}
+.rules-modal-box{width:100%;max-width:460px;background:linear-gradient(160deg,rgba(26,11,46,0.98),rgba(14,8,25,0.99));border:1.5px solid rgba(196,132,252,0.4);border-radius:22px;padding:22px;box-shadow:0 0 60px rgba(139,92,246,0.4);display:flex;flex-direction:column;gap:14px;max-height:calc(100dvh - 40px);overflow-y:auto;animation:rulesPop .3s}
 @keyframes rulesPop{from{transform:scale(0.9);opacity:0}to{transform:scale(1);opacity:1}}
-.rules-modal-title{
-  font-size:20px;
-  font-weight:900;
-  text-align:center;
-  background:linear-gradient(90deg,#FB7185,#C084FC);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  margin-bottom:4px;
-}
+.rules-modal-title{font-size:20px;font-weight:900;text-align:center;background:linear-gradient(90deg,#FB7185,#C084FC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
 .rules-list{list-style:none;display:flex;flex-direction:column;gap:10px}
 .rules-list li{display:flex;align-items:flex-start;gap:10px;font-size:13px;font-weight:700;line-height:1.65;color:#D4D4D8;background:rgba(0,0,0,0.25);padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.05)}
 .rules-list li .r-icon{font-size:18px;line-height:1.5;flex-shrink:0}
@@ -144,56 +110,64 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
 .round-info .ri-label{font-size:8px;font-weight:800;letter-spacing:1.5px;color:var(--muted)}
 .round-info .ri-num{font-size:14px;font-weight:900;color:#fff}
 
-.game-body{flex:1;min-height:0;display:grid;grid-template-rows:auto 1fr;gap:8px}
-.auction-area{display:flex;flex-direction:column;gap:8px;background:linear-gradient(160deg,rgba(139,92,246,0.08),rgba(20,20,26,0.55));border:1.5px solid rgba(196,132,252,0.25);border-radius:16px;padding:12px}
-.auction-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.auction-cat{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:900;color:var(--violet)}
-.auction-cat .ac-icon{font-size:18px}
-.auction-pts{font-size:14px;font-weight:900;padding:4px 12px;border-radius:12px;background:linear-gradient(135deg,#FBBF24,#D97706);color:#1a0b2e}
-.auction-bidbox{text-align:center;padding:10px;border-radius:14px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.06)}
+.game-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+
+.auction-area{display:flex;flex-direction:column;gap:8px;background:linear-gradient(160deg,rgba(139,92,246,0.08),rgba(20,20,26,0.55));border:1.5px solid rgba(196,132,252,0.25);border-radius:16px;padding:14px;flex:1;min-height:0;justify-content:center}
+.auction-cat{display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:900;color:var(--violet);text-align:center}
+.auction-cat .ac-icon{font-size:22px}
+.auction-bidbox{text-align:center;padding:12px;border-radius:14px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.06)}
 .auction-bidbox .ab-label{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--muted);margin-bottom:2px}
-.auction-bidbox .ab-value{font-size:26px;font-weight:900;color:var(--gold);text-shadow:0 0 12px rgba(251,191,36,0.5)}
-.auction-bidbox .ab-holder{font-size:11px;font-weight:800;color:#E9D5FF;margin-top:3px;min-height:14px}
-.auction-timer{text-align:center;font-size:12px;font-weight:900;padding:5px 10px;border-radius:10px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.4);color:#A5F3FC;min-width:70px;display:inline-block}
+.auction-bidbox .ab-value{font-size:32px;font-weight:900;color:var(--gold);text-shadow:0 0 14px rgba(251,191,36,0.5)}
+.auction-bidbox .ab-holder{font-size:12px;font-weight:800;color:#E9D5FF;margin-top:4px;min-height:16px}
+.auction-timer{text-align:center;font-size:13px;font-weight:900;padding:6px 12px;border-radius:10px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.4);color:#A5F3FC;min-width:80px;display:inline-block;align-self:center}
 .auction-timer.warn{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.55);color:#FCA5A5;animation:pulseTimer 1s ease-in-out infinite}
 @keyframes pulseTimer{0%,100%{opacity:1}50%{opacity:0.5}}
 .auction-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.auction-actions .btn{padding:12px;font-size:14px}
-.turn-hint{text-align:center;font-size:11px;font-weight:800;color:#A1A1AA}
+.auction-actions .btn{padding:14px;font-size:14px}
+.turn-hint{text-align:center;font-size:12px;font-weight:800;color:#A1A1AA}
 .turn-hint.yours{color:#FDE68A;text-shadow:0 0 8px rgba(251,191,36,0.4)}
 
-.question-area{background:linear-gradient(160deg,rgba(20,20,26,0.7),rgba(14,8,25,0.9));border:1.5px solid rgba(196,132,252,0.2);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.question-area{background:linear-gradient(160deg,rgba(20,20,26,0.7),rgba(14,8,25,0.9));border:1.5px solid rgba(196,132,252,0.2);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;overflow-y:auto}
 .question-area.hidden{display:none}
-.q-role{padding:8px 12px;border-radius:12px;text-align:center;font-size:12px;font-weight:900}
+.q-role{padding:10px 12px;border-radius:12px;text-align:center;font-size:13px;font-weight:900;flex:0 0 auto}
 .q-role.team1{background:rgba(6,182,212,0.12);border:1.5px solid rgba(6,182,212,0.4);color:#A5F3FC}
 .q-role.team2{background:rgba(236,72,153,0.12);border:1.5px solid rgba(236,72,153,0.4);color:#FBCFE8}
 .q-role.steal{background:rgba(251,191,36,0.12);border:1.5px solid rgba(251,191,36,0.5);color:#FDE68A}
-.q-text{font-size:clamp(15px,3.8vw,18px);font-weight:900;line-height:1.55;text-align:center;padding:14px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px}
-.q-answer{font-size:clamp(13px,3.2vw,16px);font-weight:900;text-align:center;padding:10px;border-radius:12px;background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04));border:1.5px solid rgba(34,197,94,0.4);color:#BBF7D0;display:none}
+.q-text{flex:1;min-height:100px;display:flex;align-items:center;justify-content:center;font-size:clamp(17px,4.5vw,22px);font-weight:900;line-height:1.6;text-align:center;padding:16px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px}
+.q-answer{flex:0 0 auto;font-size:clamp(14px,3.5vw,17px);font-weight:900;text-align:center;padding:12px;border-radius:12px;background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04));border:1.5px solid rgba(34,197,94,0.4);color:#BBF7D0;display:none}
 .q-answer.show{display:block}
 .q-answer .qa-label{font-size:10px;letter-spacing:2px;color:#86EFAC;display:block;margin-bottom:4px}
-.q-actions{display:flex;flex-direction:column;gap:8px;margin-top:auto}
-.q-actions .btn{padding:12px;font-size:14px}
+.q-actions{display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
+.q-actions .btn{padding:14px;font-size:15px}
 
-.waiting-area{background:rgba(20,20,26,0.6);border:1.5px dashed rgba(196,132,252,0.3);border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center}
+.waiting-area{background:rgba(20,20,26,0.6);border:1.5px dashed rgba(196,132,252,0.3);border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;flex:1}
 .waiting-area.hidden{display:none}
 .waiting-spinner{width:44px;height:44px;border-radius:50%;border:3px solid rgba(196,132,252,0.18);border-top-color:#C084FC;border-right-color:#EC4899;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .waiting-text{font-size:13px;font-weight:800;color:#A1A1AA}
 
-.chat-panel{background:rgba(20,20,26,0.8);border:1px solid rgba(196,132,252,0.15);border-radius:14px;display:flex;flex-direction:column;overflow:hidden;max-height:36vh;min-height:140px}
-.chat-header{padding:6px 10px;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#A1A1AA;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center}
-.chat-msgs{flex:1;overflow-y:auto;padding:6px 8px;display:flex;flex-direction:column;gap:4px}
+/* ═══ Chat - floating button + collapsible panel ═══ */
+.chat-fab{position:fixed;bottom:calc(var(--safe-bottom) + 16px);left:16px;z-index:7500;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#8B5CF6,#EC4899);border:none;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 6px 24px rgba(139,92,246,0.55);display:flex;align-items:center;justify-content:center;transition:transform .15s ease}
+.chat-fab:active{transform:scale(0.92)}
+.chat-fab .chat-badge{position:absolute;top:-2px;right:-2px;background:var(--red);color:#fff;font-size:10px;font-weight:900;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--bg-deep)}
+.chat-fab .chat-badge:empty{display:none}
+
+.chat-panel{position:fixed;bottom:calc(var(--safe-bottom) + 80px);left:16px;right:16px;max-width:380px;max-height:55vh;z-index:7501;background:rgba(20,20,26,0.97);border:1.5px solid rgba(196,132,252,0.3);border-radius:16px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.6);animation:chatSlide .2s ease-out}
+.chat-panel.show{display:flex}
+@keyframes chatSlide{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.chat-header{padding:8px 12px;font-size:12px;font-weight:900;letter-spacing:1.5px;color:#A1A1AA;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.2)}
+.chat-close{background:none;border:none;color:#A1A1AA;font-size:20px;cursor:pointer;font-weight:900;line-height:1;padding:0 4px}
+.chat-msgs{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:5px;min-height:100px;max-height:35vh}
 .chat-msgs::-webkit-scrollbar{width:4px}
 .chat-msgs::-webkit-scrollbar-thumb{background:rgba(196,132,252,0.3);border-radius:2px}
-.chat-msg{font-size:12px;font-weight:700;line-height:1.4;padding:4px 8px;border-radius:8px;background:rgba(255,255,255,0.03);word-wrap:break-word}
+.chat-msg{font-size:12px;font-weight:700;line-height:1.4;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.03);word-wrap:break-word}
 .chat-msg .cm-name{font-weight:900;margin-left:6px}
 .chat-msg.team1 .cm-name{color:#67E8F9}
 .chat-msg.team2 .cm-name{color:#FBCFE8}
-.chat-form{display:flex;gap:6px;padding:6px;border-top:1px solid rgba(255,255,255,0.05)}
-.chat-input{flex:1;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:inherit;font-size:13px;font-weight:700;outline:none}
+.chat-form{display:flex;gap:6px;padding:8px;border-top:1px solid rgba(255,255,255,0.05)}
+.chat-input{flex:1;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:inherit;font-size:13px;font-weight:700;outline:none}
 .chat-input:focus{border-color:rgba(196,132,252,0.6)}
-.chat-send{padding:8px 12px;border-radius:10px;background:linear-gradient(135deg,#8B5CF6,#EC4899);border:none;color:#fff;font-family:inherit;font-weight:900;font-size:12px;cursor:pointer}
+.chat-send{padding:10px 14px;border-radius:10px;background:linear-gradient(135deg,#8B5CF6,#EC4899);border:none;color:#fff;font-family:inherit;font-weight:900;font-size:12px;cursor:pointer}
 
 #screen-final{justify-content:center;align-items:center;gap:14px}
 .final-card{width:100%;max-width:440px;background:linear-gradient(160deg,rgba(139,92,246,0.08),rgba(20,20,26,0.7));border:1.5px solid rgba(196,132,252,0.3);border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:12px}
@@ -221,7 +195,7 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
 @media (max-width:380px){
-  .auction-bidbox .ab-value{font-size:22px}
+  .auction-bidbox .ab-value{font-size:26px}
 }
 </style>
 </head>
@@ -257,7 +231,7 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
     <div class="rules-modal-title">📖 قواعد اللعبة</div>
     <ul class="rules-list">
       <li><span class="r-icon">🎯</span><div>كل فريق يبدأ بـ <strong>500 عملة</strong> — أول فريق يوصل صفر يخسر.</div></li>
-      <li><span class="r-icon">🎴</span><div>في كل جولة تشوفوا <strong>الفئة والمستوى</strong> بس، بدون السؤال.</div></li>
+      <li><span class="r-icon">🎴</span><div>في كل جولة تشوفوا <strong>الفئة بس</strong>، والسؤال بيتكشف بعد المزاد.</div></li>
       <li><span class="r-icon">💰</span><div>المزايدة تبدأ من <strong>100</strong>، وكل رفعة <strong>+100</strong> خلال 15 ثانية.</div></li>
       <li><span class="r-icon">🏆</span><div>الفايز يدفع رهانه، ويشوف السؤال — لو جاوب <strong>صح</strong> ياخد ضعف المبلغ.</div></li>
       <li><span class="r-icon">❌</span><div>لو غلط، الخصم يقدر يسرق السؤال بـ <strong>نصف المبلغ</strong> — ولو رفض، مفيش حاجة.</div></li>
@@ -301,8 +275,8 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
 <!-- ═══ Setup ═══ -->
 <div id="screen-setup" class="screen">
   <div class="setup-card">
-    <div class="setup-title">🎯 اختر 3 فئات من 4</div>
-    <div class="setup-sub">الأسئلة هتكون عشوائية من الفئات المختارة</div>
+    <div class="setup-title">🎯 اختر الفئات</div>
+    <div class="setup-sub">اختر فئة واحدة أو أكثر (حتى 4)</div>
     <div class="cat-grid" id="catGrid">
       <button class="cat-card" data-cat="football" type="button"><span class="cat-icon">⚽</span><span class="cat-name">كرة القدم</span></button>
       <button class="cat-card" data-cat="general_info" type="button"><span class="cat-icon">💡</span><span class="cat-name">معلومات عامة</span></button>
@@ -332,10 +306,7 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
 
   <div class="game-body">
     <div class="auction-area" id="auctionArea">
-      <div class="auction-head">
-        <div class="auction-cat"><span class="ac-icon" id="acIcon">🎯</span><span id="acName">—</span></div>
-        <div class="auction-pts" id="acPts">200</div>
-      </div>
+      <div class="auction-cat"><span class="ac-icon" id="acIcon">🎯</span><span id="acName">—</span></div>
       <div class="auction-bidbox">
         <div class="ab-label">أعلى مزايدة</div>
         <div class="ab-value" id="abValue">0</div>
@@ -366,15 +337,20 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
       <div class="waiting-text" id="waitingText">—</div>
     </div>
   </div>
+</div>
 
-  <div class="chat-panel">
-    <div class="chat-header"><span>💬 الشات</span><span id="chatTeamLabel"></span></div>
-    <div class="chat-msgs" id="chatMsgs"></div>
-    <form class="chat-form" id="chatForm">
-      <input class="chat-input" id="chatInput" type="text" maxlength="200" placeholder="اكتب رسالتك..." autocomplete="off">
-      <button class="chat-send" type="submit">إرسال</button>
-    </form>
+<!-- ═══ Chat FAB + Panel ═══ -->
+<button class="chat-fab" id="chatFab" type="button" title="الشات">💬<span class="chat-badge" id="chatBadge"></span></button>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-header">
+    <span>💬 الشات</span>
+    <button class="chat-close" id="chatClose" type="button">×</button>
   </div>
+  <div class="chat-msgs" id="chatMsgs"></div>
+  <form class="chat-form" id="chatForm">
+    <input class="chat-input" id="chatInput" type="text" maxlength="200" placeholder="اكتب رسالتك..." autocomplete="off">
+    <button class="chat-send" type="submit">إرسال</button>
+  </form>
 </div>
 
 <!-- ═══ Final ═══ -->
@@ -398,31 +374,17 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     قواعد اللعبة - بيشتغل حتى بدون سيرفر
-     (لازم يكون قبل Socket.IO عشان مايتأثرش بفشل التحميل)
-     ═══════════════════════════════════════════════════════════ -->
+<!-- Rules script (before socket.io) -->
 <script>
 (function() {
   var ro = document.getElementById('rulesOverlay');
   var br = document.getElementById('btnRules');
   var bc = document.getElementById('btnCloseRules');
-
-  if (br && ro) {
-    br.addEventListener('click', function() {
-      ro.classList.add('show');
-    });
-  }
-  if (bc && ro) {
-    bc.addEventListener('click', function() {
-      ro.classList.remove('show');
-    });
-  }
-  if (ro) {
-    ro.addEventListener('click', function(e) {
-      if (e.target === ro) ro.classList.remove('show');
-    });
-  }
+  if (br && ro) br.addEventListener('click', function() { ro.classList.add('show'); });
+  if (bc && ro) bc.addEventListener('click', function() { ro.classList.remove('show'); });
+  if (ro) ro.addEventListener('click', function(e) {
+    if (e.target === ro) ro.classList.remove('show');
+  });
 })();
 </script>
 
@@ -436,10 +398,11 @@ const $ = (id) => document.getElementById(id);
 const state = {
   me: null,
   room: null,
-  myQuestionCtx: null
+  myQuestionCtx: null,
+  chatOpen: false,
+  unreadCount: 0
 };
 
-/* ═══ Helpers ═══ */
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $('screen-' + name).classList.add('active');
@@ -483,7 +446,6 @@ function validateHome() {
   btnCreate.disabled = !name;
   btnJoin.disabled = !(name && code.length === 6);
 }
-
 nameInput.addEventListener('input', validateHome);
 codeInput.addEventListener('input', e => {
   e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -497,11 +459,7 @@ btnCreate.addEventListener('click', () => {
   btnCreate.textContent = '⏳ جاري الإنشاء...';
   socket.emit('create-room', { name }, (res) => {
     btnCreate.textContent = '🏠 إنشاء غرفة';
-    if (!res.ok) {
-      showToast(res.error || 'فشل', 'error');
-      validateHome();
-      return;
-    }
+    if (!res.ok) { showToast(res.error || 'فشل', 'error'); validateHome(); return; }
     state.room = res.room;
     state.me = findMe();
     showScreen('lobby');
@@ -517,11 +475,7 @@ btnJoin.addEventListener('click', () => {
   btnJoin.textContent = '⏳ جاري الانضمام...';
   socket.emit('join-room', { name, code }, (res) => {
     btnJoin.textContent = '🔗 الانضمام لغرفة';
-    if (!res.ok) {
-      showToast(res.error || 'فشل', 'error');
-      validateHome();
-      return;
-    }
+    if (!res.ok) { showToast(res.error || 'فشل', 'error'); validateHome(); return; }
     state.room = res.room;
     state.me = findMe();
     showScreen('lobby');
@@ -529,18 +483,23 @@ btnJoin.addEventListener('click', () => {
   });
 });
 
-/* ═══ Socket events ═══ */
+/* ═══ Socket ═══ */
 socket.on('room-update', (room) => {
   state.room = room;
   state.me = findMe();
-
   if (room.status === 'lobby') { showScreen('lobby'); renderLobby(); }
   else if (room.status === 'setup') { showScreen('setup'); renderSetup(); }
   else if (room.status === 'playing') { renderGame(); }
   else if (room.status === 'ended') { renderFinal(); }
 });
 
-socket.on('chat-msg', (msg) => appendChat(msg));
+socket.on('chat-msg', (msg) => {
+  appendChat(msg);
+  if (!state.chatOpen) {
+    state.unreadCount++;
+    updateChatBadge();
+  }
+});
 
 socket.on('show-question', ({ question, answer, isSteal }) => {
   state.myQuestionCtx = { question, answer, isSteal };
@@ -563,8 +522,6 @@ socket.on('auction-won', ({ winnerTeam, bid }) => {
   showBigEvent('🎯', `${teamName} فاز بالمزاد`, `دفع ${bid} 🪙`);
 });
 
-socket.on('steal-offer', () => {});
-
 socket.on('error-msg', (msg) => showToast(msg, 'error'));
 
 function findMe() {
@@ -580,18 +537,12 @@ $('btnCopy').addEventListener('click', () => {
   }).catch(() => showToast('فشل النسخ', 'error'));
 });
 
-$('btnSwapTeam').addEventListener('click', () => {
-  socket.emit('swap-team');
-});
-
-$('btnStartSetup').addEventListener('click', () => {
-  socket.emit('start-setup');
-});
+$('btnSwapTeam').addEventListener('click', () => socket.emit('swap-team'));
+$('btnStartSetup').addEventListener('click', () => socket.emit('start-setup'));
 
 function renderLobby() {
   const room = state.room;
   if (!room) return;
-
   $('lobbyCode').textContent = room.code;
 
   const t1 = $('lobbyPlayers1');
@@ -636,7 +587,6 @@ function renderLobby() {
 
   const total = room.players.length;
   const isHost = state.me && state.me.id === room.hostId;
-
   const status = $('lobbyStatus');
   status.className = 'lobby-status';
 
@@ -661,7 +611,7 @@ function renderLobby() {
   }
 }
 
-/* ═══ Setup ═══ */
+/* ═══ Setup — 1 to 4 categories ═══ */
 let selectedCats = new Set();
 
 document.querySelectorAll('.cat-card').forEach(card => {
@@ -671,19 +621,15 @@ document.querySelectorAll('.cat-card').forEach(card => {
       selectedCats.delete(cat);
       card.classList.remove('selected');
     } else {
-      if (selectedCats.size >= 3) {
-        showToast('اختر 3 فئات بس', 'error');
-        return;
-      }
       selectedCats.add(cat);
       card.classList.add('selected');
     }
-    $('btnConfirmCats').disabled = selectedCats.size !== 3;
+    $('btnConfirmCats').disabled = selectedCats.size < 1;
   });
 });
 
 $('btnConfirmCats').addEventListener('click', () => {
-  if (selectedCats.size !== 3) return;
+  if (selectedCats.size < 1) return;
   socket.emit('set-categories', { categories: Array.from(selectedCats) });
 });
 
@@ -697,7 +643,7 @@ function renderSetup() {
     $('btnConfirmCats').textContent = '⏳ في انتظار صاحب الغرفة...';
   } else {
     $('btnConfirmCats').textContent = '✅ ابدأ اللعبة';
-    $('btnConfirmCats').disabled = selectedCats.size !== 3;
+    $('btnConfirmCats').disabled = selectedCats.size < 1;
   }
 }
 
@@ -740,8 +686,6 @@ function renderGame() {
 
     $('acIcon').textContent = catIcon(a.category);
     $('acName').textContent = a.category || '—';
-    $('acPts').textContent = a.points;
-
     $('abValue').textContent = a.currentBid;
     $('abHolder').textContent = a.lastBidder === -1
       ? 'لسه محدش زايد'
@@ -810,7 +754,6 @@ function renderGame() {
     const qa = $('qRole');
     qa.className = 'q-role steal';
     qa.textContent = `🎯 فرصة سرقة — ${room.teams[a.stealTeam].name}`;
-
     $('qText').textContent = 'هل تريد سرقة السؤال؟';
     $('qAnswer').classList.remove('show');
 
@@ -939,6 +882,30 @@ $('btnRestart').addEventListener('click', () => {
 });
 
 /* ═══ Chat ═══ */
+$('chatFab').addEventListener('click', () => {
+  state.chatOpen = !state.chatOpen;
+  $('chatPanel').classList.toggle('show', state.chatOpen);
+  if (state.chatOpen) {
+    state.unreadCount = 0;
+    updateChatBadge();
+    setTimeout(() => {
+      const msgs = $('chatMsgs');
+      msgs.scrollTop = msgs.scrollHeight;
+      $('chatInput').focus();
+    }, 100);
+  }
+});
+
+$('chatClose').addEventListener('click', () => {
+  state.chatOpen = false;
+  $('chatPanel').classList.remove('show');
+});
+
+function updateChatBadge() {
+  const b = $('chatBadge');
+  b.textContent = state.unreadCount > 0 ? state.unreadCount : '';
+}
+
 function appendChat(msg) {
   const container = $('chatMsgs');
   if (!container) return;
