@@ -99,9 +99,11 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
 .cat-card.selected{border-color:var(--gold);background:rgba(251,191,36,0.1);box-shadow:0 0 18px rgba(251,191,36,0.25)}
 .cat-card.selected .cat-name{color:#FDE68A}
 
-/* ═══ Game ═══ */
-#screen-game{padding:calc(var(--safe-top) + 8px) 10px calc(var(--safe-bottom) + 8px);gap:8px}
-.top-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;background:rgba(20,20,26,0.75);border:1px solid rgba(196,132,252,0.15);border-radius:14px;padding:6px 8px}
+/* ═══════════════════════════════════════════════════════════════
+   🎮 Game — كل حاجة fit على حجم الشاشة بالظبط بدون سكرول
+   ═══════════════════════════════════════════════════════════════ */
+#screen-game{padding:calc(var(--safe-top) + 8px) 10px calc(var(--safe-bottom) + 8px);gap:8px;overflow:hidden}
+.top-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;background:rgba(20,20,26,0.75);border:1px solid rgba(196,132,252,0.15);border-radius:14px;padding:6px 8px;flex:0 0 auto}
 .balance-box{display:flex;flex-direction:column;gap:1px;padding:5px 8px;border-radius:10px;border:1.5px solid transparent;background:rgba(255,255,255,0.02);min-width:0;text-align:center}
 .balance-box.team1{border-color:rgba(6,182,212,0.25)}
 .balance-box.team2{border-color:rgba(236,72,153,0.25)}
@@ -116,49 +118,116 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
 .round-info .ri-label{font-size:8px;font-weight:800;letter-spacing:1.5px;color:var(--muted)}
 .round-info .ri-num{font-size:14px;font-weight:900;color:#fff}
 
-.game-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.game-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;overflow:hidden}
 
-.auction-area{display:flex;flex-direction:column;gap:8px;background:linear-gradient(160deg,rgba(139,92,246,0.08),rgba(20,20,26,0.55));border:1.5px solid rgba(196,132,252,0.25);border-radius:16px;padding:14px;flex:1;min-height:0;justify-content:center}
-.auction-cat{display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:900;color:var(--violet);text-align:center}
+/* ═══ Auction ═══ */
+.auction-area{display:flex;flex-direction:column;gap:8px;background:linear-gradient(160deg,rgba(139,92,246,0.08),rgba(20,20,26,0.55));border:1.5px solid rgba(196,132,252,0.25);border-radius:16px;padding:14px;flex:1;min-height:0;justify-content:center;overflow:hidden}
+.auction-cat{display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:900;color:var(--violet);text-align:center;flex:0 0 auto}
 .auction-cat .ac-icon{font-size:22px}
-.auction-bidbox{text-align:center;padding:12px;border-radius:14px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.06)}
+.auction-bidbox{text-align:center;padding:12px;border-radius:14px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.06);flex:0 0 auto}
 .auction-bidbox .ab-label{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--muted);margin-bottom:2px}
 .auction-bidbox .ab-value{font-size:32px;font-weight:900;color:var(--gold);text-shadow:0 0 14px rgba(251,191,36,0.5)}
 .auction-bidbox .ab-holder{font-size:12px;font-weight:800;color:#E9D5FF;margin-top:4px;min-height:16px}
-.auction-timer{text-align:center;font-size:13px;font-weight:900;padding:6px 12px;border-radius:10px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.4);color:#A5F3FC;min-width:80px;display:inline-block;align-self:center}
+.auction-timer{text-align:center;font-size:13px;font-weight:900;padding:6px 12px;border-radius:10px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.4);color:#A5F3FC;min-width:80px;display:inline-block;align-self:center;flex:0 0 auto}
 .auction-timer.warn{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.55);color:#FCA5A5;animation:pulseTimer 1s ease-in-out infinite}
 @keyframes pulseTimer{0%,100%{opacity:1}50%{opacity:0.5}}
-.auction-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.auction-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:0 0 auto}
 .auction-actions .btn{padding:14px;font-size:14px}
-.turn-hint{text-align:center;font-size:12px;font-weight:800;color:#A1A1AA}
+.turn-hint{text-align:center;font-size:12px;font-weight:800;color:#A1A1AA;flex:0 0 auto}
 .turn-hint.yours{color:#FDE68A;text-shadow:0 0 8px rgba(251,191,36,0.4)}
 
-.question-area{background:linear-gradient(160deg,rgba(20,20,26,0.7),rgba(14,8,25,0.9));border:1.5px solid rgba(196,132,252,0.2);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;overflow-y:auto}
+/* ═══ Question — كل حاجة fit على الشاشة، والسؤال بيتصغّر تلقائي لو طويل ═══ */
+.question-area{
+  background:linear-gradient(160deg,rgba(20,20,26,0.7),rgba(14,8,25,0.9));
+  border:1.5px solid rgba(196,132,252,0.2);
+  border-radius:16px;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  flex:1;
+  min-height:0;
+  overflow:hidden;
+}
 .question-area.hidden{display:none}
-.q-role{padding:10px 12px;border-radius:12px;text-align:center;font-size:13px;font-weight:900;flex:0 0 auto}
+
+.q-role{padding:8px 12px;border-radius:12px;text-align:center;font-size:12px;font-weight:900;flex:0 0 auto}
 .q-role.team1{background:rgba(6,182,212,0.12);border:1.5px solid rgba(6,182,212,0.4);color:#A5F3FC}
 .q-role.team2{background:rgba(236,72,153,0.12);border:1.5px solid rgba(236,72,153,0.4);color:#FBCFE8}
 .q-role.steal{background:rgba(251,191,36,0.12);border:1.5px solid rgba(251,191,36,0.5);color:#FDE68A}
-.q-text{flex:1;min-height:100px;display:flex;align-items:center;justify-content:center;font-size:clamp(17px,4.5vw,22px);font-weight:900;line-height:1.6;text-align:center;padding:16px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px}
-.q-answer{flex:0 0 auto;font-size:clamp(14px,3.5vw,17px);font-weight:900;text-align:center;padding:12px;border-radius:12px;background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04));border:1.5px solid rgba(34,197,94,0.4);color:#BBF7D0;display:none}
+
+/* السؤال — fit-content مع auto-scale بالـ font-size، مفيش سكرول */
+.q-text{
+  flex:1;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:10px 8px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  font-weight:900;
+  line-height:1.5;
+  word-wrap:break-word;
+  overflow:hidden;
+  /* حجم الخط بيتظبط بالـ JS على حسب طول النص */
+  font-size:clamp(14px,4.2vw,20px);
+}
+
+.q-answer{
+  flex:0 0 auto;
+  font-size:clamp(13px,3.3vw,16px);
+  font-weight:900;
+  text-align:center;
+  padding:10px;
+  border-radius:12px;
+  background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04));
+  border:1.5px solid rgba(34,197,94,0.4);
+  color:#BBF7D0;
+  display:none;
+}
 .q-answer.show{display:block}
 .q-answer .qa-label{font-size:10px;letter-spacing:2px;color:#86EFAC;display:block;margin-bottom:4px}
-.q-actions{display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
-.q-actions .btn{padding:14px;font-size:15px}
 
-.waiting-area{background:rgba(20,20,26,0.6);border:1.5px dashed rgba(196,132,252,0.3);border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;flex:1}
+.q-actions{display:flex;flex-direction:column;gap:6px;flex:0 0 auto}
+.q-actions .btn{padding:11px;font-size:14px}
+
+/* ═══ Waiting ═══ */
+.waiting-area{background:rgba(20,20,26,0.6);border:1.5px dashed rgba(196,132,252,0.3);border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;flex:1;min-height:0}
 .waiting-area.hidden{display:none}
 .waiting-spinner{width:44px;height:44px;border-radius:50%;border:3px solid rgba(196,132,252,0.18);border-top-color:#C084FC;border-right-color:#EC4899;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .waiting-text{font-size:13px;font-weight:800;color:#A1A1AA}
 
-/* ═══ Chat ═══ */
-.chat-fab{position:fixed;bottom:calc(var(--safe-bottom) + 16px);left:16px;z-index:7500;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#8B5CF6,#EC4899);border:none;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 6px 24px rgba(139,92,246,0.55);display:flex;align-items:center;justify-content:center;transition:transform .15s ease}
+/* ═══ Chat FAB — بيظهر بس في شاشة اللعب، تحت يمين ═══ */
+.chat-fab{
+  position:fixed;
+  bottom:calc(var(--safe-bottom) + 14px);
+  right:14px;
+  z-index:7500;
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#8B5CF6,#EC4899);
+  border:none;
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
+  box-shadow:0 6px 24px rgba(139,92,246,0.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  transition:transform .15s ease;
+  opacity:0.92;
+}
+body.in-game .chat-fab{display:flex}
 .chat-fab:active{transform:scale(0.92)}
-.chat-fab .chat-badge{position:absolute;top:-2px;right:-2px;background:var(--red);color:#fff;font-size:10px;font-weight:900;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--bg-deep)}
+.chat-fab .chat-badge{position:absolute;top:-2px;left:-2px;background:var(--red);color:#fff;font-size:10px;font-weight:900;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--bg-deep)}
 .chat-fab .chat-badge:empty{display:none}
 
-.chat-panel{position:fixed;bottom:calc(var(--safe-bottom) + 80px);left:16px;right:16px;max-width:380px;max-height:55vh;z-index:7501;background:rgba(20,20,26,0.97);border:1.5px solid rgba(196,132,252,0.3);border-radius:16px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.6);animation:chatSlide .2s ease-out}
+.chat-panel{position:fixed;bottom:calc(var(--safe-bottom) + 72px);left:14px;right:14px;max-width:360px;max-height:50vh;z-index:7501;background:rgba(20,20,26,0.97);border:1.5px solid rgba(196,132,252,0.3);border-radius:16px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.6);animation:chatSlide .2s ease-out}
 .chat-panel.show{display:flex}
 @keyframes chatSlide{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 .chat-header{padding:8px 12px;font-size:12px;font-weight:900;letter-spacing:1.5px;color:#A1A1AA;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.2)}
@@ -190,15 +259,6 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
 .toast.show{opacity:1}
 .toast.success{border-color:rgba(34,197,94,0.6);color:#BBF7D0}
 .toast.error{border-color:rgba(239,68,68,0.6);color:#FCA5A5}
-.toast.gold{border-color:rgba(251,191,36,0.6);color:#FDE68A}
-
-.big-event{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9000;pointer-events:none;background:rgba(5,2,12,0.75);backdrop-filter:blur(6px)}
-.big-event.show{display:flex;animation:fadeIn .2s}
-.big-event-box{padding:24px 32px;border-radius:22px;background:linear-gradient(160deg,rgba(26,11,46,0.96),rgba(14,8,25,0.98));border:2px solid rgba(251,191,36,0.5);text-align:center;box-shadow:0 0 60px rgba(251,191,36,0.3);animation:rulesPop .3s;max-width:90vw}
-.big-event-icon{font-size:48px;line-height:1;margin-bottom:8px}
-.big-event-text{font-size:20px;font-weight:900;color:#FDE68A}
-.big-event-sub{font-size:13px;font-weight:700;color:#A1A1AA;margin-top:6px}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
 @media (max-width:380px){
   .auction-bidbox .ab-value{font-size:26px}
@@ -240,7 +300,7 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
       <li><span class="r-icon">🎴</span><div>في كل جولة تشوفوا <strong>الفئة بس</strong>، والسؤال بيتكشف بعد المزاد.</div></li>
       <li><span class="r-icon">💰</span><div>المزايدة تبدأ من <strong>100</strong>، وكل رفعة <strong>+100</strong>، بحد أقصى <strong>500</strong> للمزايدة.</div></li>
       <li><span class="r-icon">⏱️</span><div>وقت المزايدة <strong>15 ثانية</strong> لكل رفعة.</div></li>
-      <li><span class="r-icon">🧠</span><div>وقت الإجابة <strong>مفتوح</strong> — خد وقتك كامل في قراءة السؤال والتفكير، مفيش عداد.</div></li>
+      <li><span class="r-icon">🧠</span><div>وقت الإجابة <strong>مفتوح</strong> — خد وقتك كامل في قراءة السؤال والتفكير.</div></li>
       <li><span class="r-icon">🏆</span><div>الفايز يدفع رهانه، ويشوف السؤال — لو جاوب <strong>صح</strong> ياخد ضعف المبلغ.</div></li>
       <li><span class="r-icon">❌</span><div>لو غلط، الخصم يقدر يسرق السؤال بـ <strong>نصف المبلغ</strong> — ولو رفض، مفيش حاجة.</div></li>
       <li><span class="r-icon">👀</span><div>الخصم <strong>مش هيشوف السؤال</strong> غير لما يقرر يسرق.</div></li>
@@ -375,15 +435,8 @@ html,body{width:100vw;height:100vh;height:100dvh;overflow:hidden;position:fixed;
   </div>
 </div>
 
-<!-- Toast + Event overlay -->
+<!-- Toast -->
 <div class="toast" id="toast"></div>
-<div class="big-event" id="bigEvent">
-  <div class="big-event-box">
-    <div class="big-event-icon" id="beIcon">🎉</div>
-    <div class="big-event-text" id="beText">—</div>
-    <div class="big-event-sub" id="beSub"></div>
-  </div>
-</div>
 
 <!-- Rules script (before socket.io) -->
 <script>
@@ -414,9 +467,16 @@ const state = {
   unreadCount: 0
 };
 
+/* ═══ Screens — بتضيف class على body عشان chat-fab يظهر بس في اللعب ═══ */
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $('screen-' + name).classList.add('active');
+  document.body.classList.toggle('in-game', name === 'game');
+  // قفل الشات لو خرجنا من شاشة اللعب
+  if (name !== 'game') {
+    state.chatOpen = false;
+    $('chatPanel').classList.remove('show');
+  }
 }
 
 let toastTimer = null;
@@ -428,22 +488,51 @@ function showToast(text, type = '') {
   toastTimer = setTimeout(() => t.className = 'toast ' + type, 2600);
 }
 
-let bigEventTimer = null;
-function showBigEvent(icon, text, sub = '') {
-  $('beIcon').textContent = icon;
-  $('beText').textContent = text;
-  $('beSub').textContent = sub;
-  $('bigEvent').classList.add('show');
-  clearTimeout(bigEventTimer);
-  bigEventTimer = setTimeout(() => $('bigEvent').classList.remove('show'), 2200);
-}
-
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 const CAT_ICONS = { 'كرة القدم': '⚽', 'معلومات عامة': '💡', 'إسلاميات': '🕌', 'الأنمي': '🎌' };
 function catIcon(name) { return CAT_ICONS[name] || '🎯'; }
+
+/* ═══════════════════════════════════════════════════════════════
+   📐 Auto-fit السؤال — بيصغّر الخط تلقائياً لو طويل
+   ═══════════════════════════════════════════════════════════════ */
+function fitQuestionText() {
+  const el = $('qText');
+  if (!el) return;
+  const box = el.parentElement;
+  if (!box) return;
+
+  // نبدأ من حجم كبير ونصغّر لحد ما يدخل
+  const maxSize = Math.min(22, window.innerWidth * 0.055);
+  const minSize = 11;
+  let size = maxSize;
+
+  el.style.fontSize = size + 'px';
+
+  // نضغط الحجم بمقدار 0.5 لحد ما المحتوى يدخل في الطول
+  let attempts = 0;
+  while (
+    (el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth) &&
+    size > minSize &&
+    attempts < 30
+  ) {
+    size -= 1;
+    el.style.fontSize = size + 'px';
+    attempts++;
+  }
+}
+
+function refitSoon() {
+  requestAnimationFrame(() => {
+    fitQuestionText();
+    requestAnimationFrame(fitQuestionText);
+  });
+}
+
+window.addEventListener('resize', refitSoon);
+window.addEventListener('orientationchange', () => setTimeout(refitSoon, 300));
 
 /* ═══ Home ═══ */
 const nameInput = $('nameInput');
@@ -517,21 +606,13 @@ socket.on('show-question', ({ question, answer, isSteal }) => {
   renderMyQuestion();
 });
 
-socket.on('answer-result', ({ team, correct, reward, isSteal }) => {
-  const teamName = state.room?.teams?.[team]?.name || '?';
-  if (correct) {
-    showBigEvent('✅', `${teamName} أجاب صح!`, `+${reward} 🪙${isSteal ? ' (سرقة)' : ''}`);
-  } else {
-    showBigEvent('❌', `${teamName} أجاب غلط`, isSteal ? 'خسر سعر السرقة' : '');
-  }
+/* شلنا الإشعارات الكبيرة — التحديث هيبان تلقائي في الرصيد */
+socket.on('answer-result', () => {
   state.myQuestionCtx = null;
   $('questionArea').classList.add('hidden');
 });
 
-socket.on('auction-won', ({ winnerTeam, bid }) => {
-  const teamName = state.room?.teams?.[winnerTeam]?.name || '?';
-  showBigEvent('🎯', `${teamName} فاز بالمزاد`, `دفع ${bid} 🪙`);
-});
+socket.on('auction-won', () => {});
 
 socket.on('error-msg', (msg) => showToast(msg, 'error'));
 
@@ -859,6 +940,7 @@ function renderGame() {
 
     actions.appendChild(yes);
     actions.appendChild(no);
+    refitSoon();
   }
 
   if ((a.phase === 'answering' && iWon) || (a.phase === 'steal-answering' && iAmSteal)) {
@@ -900,6 +982,7 @@ function renderMyQuestion() {
   btnShow.onclick = () => {
     $('qAnswer').classList.add('show');
     actions.removeChild(btnShow);
+    refitSoon();
   };
 
   const btnCorrect = document.createElement('button');
@@ -923,6 +1006,9 @@ function renderMyQuestion() {
   actions.appendChild(btnShow);
   actions.appendChild(btnCorrect);
   actions.appendChild(btnWrong);
+
+  // ⚡ صغّر الخط لو السؤال طويل
+  refitSoon();
 }
 
 $('btnBid').addEventListener('click', () => socket.emit('bid'));
