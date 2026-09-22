@@ -18,6 +18,7 @@ const START_BALANCE = 500;
 const MAX_BID = 500;
 const BATCH_SIZE = 5;
 const REFILL_AT = 4;
+const MAX_MEMORY = 60;
 
 const CATEGORIES = {
   football: 'كرة القدم',
@@ -27,14 +28,21 @@ const CATEGORIES = {
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   🤖 توليد الأسئلة
+   🤖 توليد الأسئلة (مع منع التكرار)
    ═══════════════════════════════════════════════════════════════ */
-async function generateQuestions(catIds) {
+async function generateQuestions(catIds, previousQuestions = []) {
   if (!GROQ_KEY) throw new Error('GROQ_API_KEY missing');
   const catList = catIds.map(c => CATEGORIES[c] || c).join('، ');
 
-  const prompt = `أعد 5 أسئلة معلومات عامة بالعربية من الفئات التالية فقط: ${catList}.
+  // آخر 30 سؤال بس عشان الطلب ميطولش
+  const recent = previousQuestions.slice(-30);
+  let avoidBlock = '';
+  if (recent.length > 0) {
+    avoidBlock = `\n⛔ ممنوع تماماً تكرار أو إعادة صياغة أي سؤال من الأسئلة دي (اتسألت قبل كده):\n${recent.map((q, i) => `${i + 1}. ${q}`).join('\n')}\n`;
+  }
 
+  const prompt = `أعد 5 أسئلة معلومات عامة بالعربية من الفئات التالية فقط: ${catList}.
+${avoidBlock}
 شروط صارمة:
 - سؤال مفتوح بإجابة واحدة قصيرة ومحددة (اسم، رقم، تاريخ، مكان)
 - ممنوع تماماً أي اختيارات (أ-ب-ج-د) أو بدائل
@@ -43,6 +51,7 @@ async function generateQuestions(catIds) {
 - كل النصوص بالعربية الفصحى
 - نوّع في صعوبة الأسئلة (سهل، متوسط، صعب، صعب جدًا)
 - كل سؤال من فئة مختلفة عن التاني لو أمكن
+- لا تكرر أي سؤال من القائمة الممنوعة فوق، حتى لو بصيغة مختلفة
 
 أعد JSON فقط:
 {"questions":[{"category":"كرة القدم","question":"...","answer":"..."},{"category":"...","question":"...","answer":"..."},{"category":"...","question":"...","answer":"..."},{"category":"...","question":"...","answer":"..."},{"category":"...","question":"...","answer":"..."}]}`;
@@ -61,7 +70,7 @@ async function generateQuestions(catIds) {
         model: 'openai/gpt-oss-120b',
         messages: [{ role: 'user', content: prompt }],
         response_format: { type: 'json_object' },
-        temperature: 0.9,
+        temperature: 1.0,
         max_tokens: 1800
       }),
       signal: controller.signal
@@ -185,7 +194,6 @@ function stopAuctionTimer(room) {
 function handleTimeout(room) {
   const a = room.auction;
   if (!a) return;
-  // المؤقت شغال بس في مرحلة المزايدة
   if (a.phase === 'bidding') handlePass(room, a.activeTeam);
 }
 
@@ -203,7 +211,7 @@ async function refillQuestions(room) {
   room.loading = true;
   broadcast(room);
   try {
-    const newQs = await generateQuestions(room.categories);
+    const newQs = await generateQuestions(room.categories, room.askedQuestions);
     room.questions.push(...newQs);
     console.log(`✅ دفعة جديدة: ${newQs.length} أسئلة (المتبقي: ${room.questions.length})`);
   } catch (e) {
@@ -220,6 +228,12 @@ function beginRound(room) {
   if (!q) {
     refillQuestions(room);
     return;
+  }
+
+  // سجّل السؤال في الذاكرة عشان مايتكررش
+  room.askedQuestions.push(q.question);
+  if (room.askedQuestions.length > MAX_MEMORY) {
+    room.askedQuestions = room.askedQuestions.slice(-MAX_MEMORY);
   }
 
   room.auction = {
@@ -248,7 +262,6 @@ function handleBid(room, teamIdx) {
 
   const nextBid = a.currentBid + BID_STEP;
 
-  // ⛔ حد أقصى للمزايدة
   if (nextBid > MAX_BID) return;
   if (nextBid > room.teams[teamIdx].balance) return;
 
@@ -281,7 +294,6 @@ function handlePass(room, teamIdx) {
 
   room.teams[a.winnerTeam].balance -= a.currentBid;
   a.phase = 'answering';
-  // ⏱️ مفيش مؤقت هنا — خد وقتك في الإجابة
 
   io.to(room.code).emit('auction-won', {
     winnerTeam: a.winnerTeam,
@@ -299,7 +311,6 @@ function handlePass(room, teamIdx) {
   });
 
   broadcast(room);
-  // ❌ مفيش startAuctionTimer هنا
 }
 
 function handleAnswer(room, teamIdx, isCorrect) {
@@ -334,7 +345,7 @@ function handleAnswer(room, teamIdx, isCorrect) {
     a.timeLeft = 15;
     broadcast(room);
     io.to(room.code).emit('steal-offer', { team: otherTeam, price: halfBid });
-    startAuctionTimer(room); // المزايدة للسرقة عايزة تايم 15 ث (قرار الموافقة/الرفض)
+    startAuctionTimer(room);
   }
 }
 
@@ -354,7 +365,6 @@ function handleStealDecision(room, accept) {
 
   room.teams[a.stealTeam].balance -= a.stealPrice;
   a.phase = 'steal-answering';
-  // ⏱️ مفيش مؤقت هنا
 
   const stealSockets = Object.values(room.players).filter(p => p.team === a.stealTeam);
   stealSockets.forEach(p => {
@@ -366,7 +376,6 @@ function handleStealDecision(room, accept) {
   });
 
   broadcast(room);
-  // ❌ مفيش startAuctionTimer
 }
 
 function handleStealAnswer(room, isCorrect) {
@@ -429,6 +438,7 @@ io.on('connection', (socket) => {
       teamNames: ['', ''],
       categories: [],
       questions: [],
+      askedQuestions: [],
       round: 1,
       startingTeam: 0,
       auction: null,
@@ -546,13 +556,14 @@ io.on('connection', (socket) => {
     room.round = 1;
     room.startingTeam = 0;
     room.questions = [];
+    room.askedQuestions = [];
     room.teams[0].balance = START_BALANCE;
     room.teams[1].balance = START_BALANCE;
     room.loading = true;
     broadcast(room);
 
     try {
-      const qs = await generateQuestions(room.categories);
+      const qs = await generateQuestions(room.categories, []);
       room.questions = qs;
       room.loading = false;
       broadcast(room);
@@ -638,6 +649,7 @@ io.on('connection', (socket) => {
     room.teams[1].name = 'الفريق الثاني';
     room.teamNames = ['', ''];
     room.questions = [];
+    room.askedQuestions = [];
     room.auction = null;
     room.round = 1;
     room.startingTeam = 0;
